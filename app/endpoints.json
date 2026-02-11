@@ -1,0 +1,6 @@
+{
+  "_comment": "TODO: Set endpoint paths from MarketCheck docs before refresh/testing.",
+  "search_listings": "/TODO_SET_MARKETCHECK_SEARCH_ENDPOINT",
+  "health_test": "/TODO_SET_MARKETCHECK_HEALTH_ENDPOINT"
+}
+

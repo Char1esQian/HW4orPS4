@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HW4 Finder</title>
+    <style>
+      :root {
+        --bg: #f5f4ef;
+        --paper: #fffdf8;
+        --ink: #1f2937;
+        --muted: #596377;
+        --line: #d8d8cf;
+        --accent: #0f766e;
+        --accent-strong: #115e59;
+        --warn: #92400e;
+        --ok-bg: #ecfdf5;
+        --ok-ink: #065f46;
+        --bad-bg: #fff7ed;
+        --bad-ink: #9a3412;
+      }
+      body {
+        font-family: "Segoe UI Variable Text", "Trebuchet MS", "Helvetica Neue",
+          sans-serif;
+        margin: 0;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 10% 0%, #f6efe3 0%, transparent 40%),
+          radial-gradient(circle at 100% 0%, #e8f5f4 0%, transparent 35%),
+          var(--bg);
+      }
+      .container {
+        max-width: 1180px;
+        margin: 24px auto 36px auto;
+        padding: 0 14px;
+      }
+      .hero {
+        background: linear-gradient(130deg, #fffdfa, #f4faf9);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px;
+        box-shadow: 0 8px 20px rgba(17, 24, 39, 0.05);
+      }
+      .title {
+        margin: 0;
+        font-family: "Cambria", "Georgia", serif;
+        letter-spacing: 0.3px;
+        font-size: 30px;
+        color: #0f172a;
+      }
+      .subtitle {
+        margin: 6px 0 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .toolbar {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+      .btn {
+        border: 1px solid var(--accent);
+        border-radius: 10px;
+        background: var(--accent);
+        color: white;
+        padding: 8px 12px;
+        font-size: 14px;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background: var(--accent-strong);
+        border-color: var(--accent-strong);
+      }
+      .btn-secondary {
+        background: #fff;
+        color: var(--accent-strong);
+      }
+      .filters {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .filters label {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .filters input {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+        padding: 8px 10px;
+        font-size: 14px;
+      }
+      .filters .apply {
+        align-self: end;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th, td {
+        border-bottom: 1px solid var(--line);
+        padding: 10px 8px;
+        font-size: 13px;
+      }
+      th {
+        background: #f6f7f3;
+        text-align: left;
+        color: #374151;
+        position: sticky;
+        top: 0;
+      }
+      td a {
+        color: var(--accent-strong);
+      }
+      tbody tr:hover {
+        background: #fafbf7;
+      }
+      .status {
+        margin-top: 12px;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        font-size: 14px;
+      }
+      .status.neutral {
+        background: #f8fafc;
+        color: #334155;
+        border-color: #cbd5e1;
+      }
+      .status.success {
+        background: var(--ok-bg);
+        color: var(--ok-ink);
+        border-color: #86efac;
+      }
+      .status.failed {
+        background: var(--bad-bg);
+        color: var(--bad-ink);
+        border-color: #fed7aa;
+      }
+      .status.working {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border-color: #93c5fd;
+      }
+      .status.working::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        display: inline-block;
+        border-radius: 50%;
+        margin-right: 8px;
+        background: #2563eb;
+        animation: pulse 1s infinite ease-in-out;
+      }
+      @keyframes pulse {
+        0% { opacity: 0.35; transform: scale(0.95); }
+        50% { opacity: 1; transform: scale(1.12); }
+        100% { opacity: 0.35; transform: scale(0.95); }
+      }
+      .helper {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+      .panel {
+        margin-top: 18px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--paper);
+        box-shadow: 0 6px 16px rgba(17, 24, 39, 0.04);
+        overflow: hidden;
+      }
+      .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        background: #fff;
+      }
+      .panel-header h2 {
+        margin: 0;
+        font-size: 16px;
+      }
+      .pill {
+        display: inline-flex;
+        border: 1px solid #c7d2fe;
+        background: #eef2ff;
+        color: #3730a3;
+        border-radius: 999px;
+        padding: 3px 10px;
+        font-size: 12px;
+      }
+      .table-wrap {
+        overflow-x: auto;
+        padding: 0 10px 10px 10px;
+      }
+      .chart-box {
+        padding: 12px 14px 8px 14px;
+        border-bottom: 1px solid var(--line);
+        background: #fdfefb;
+      }
+      .chart-title {
+        font-size: 13px;
+        color: #334155;
+        margin-bottom: 8px;
+      }
+      .scatter-chart {
+        width: 100%;
+        height: 300px;
+        display: block;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #ffffff;
+      }
+      .chart-empty {
+        margin-top: 8px;
+        font-size: 12px;
+      }
+      .dot-point {
+        cursor: pointer;
+        opacity: 0.9;
+      }
+      .dot-point:hover {
+        opacity: 1;
+      }
+      .dot-point.selected {
+        stroke: #0f172a;
+        stroke-width: 2.5;
+      }
+      tr.row-selected td {
+        background: #e0f2fe;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      @media (max-width: 980px) {
+        .filters {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 620px) {
+        .container {
+          margin-top: 14px;
+        }
+        .filters {
+          grid-template-columns: 1fr;
+        }
+        .title {
+          font-size: 26px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <section class="hero">
+        <h1 class="title">Tesla HW4 Finder</h1>
+        <p class="subtitle">
+          Local MarketCheck tracker for Massachusetts Model Y HW4-likely and Model 3 (2024+).
+        </p>
+
+        <div class="toolbar">
+          <form id="refresh-form" method="post" action="{{ refresh_action }}">
+            <button id="refresh-btn" class="btn" type="submit">Refresh Listings</button>
+          </form>
+          <a class="btn btn-secondary" href="{{ export_csv_url }}">Export CSV</a>
+          <a class="btn btn-secondary" href="{{ export_json_url }}">Export JSON</a>
+        </div>
+
+        <div class="helper">
+          `Refresh Listings` pulls fresh data from MarketCheck and upserts it into SQLite.
+          `Apply Filters` only filters the listings already stored locally (it does not call MarketCheck).
+        </div>
+
+        <form id="filter-form" class="filters" method="get" action="/">
+          <label>State <input type="text" name="state" value="{{ filters.state }}" maxlength="2" /></label>
+          <label>Min Price <input type="number" name="min_price" value="{{ filters.min_price or '' }}" /></label>
+          <label>Max Price <input type="number" name="max_price" value="{{ filters.max_price or '' }}" /></label>
+          <label>Min Miles <input type="number" name="min_miles" value="{{ filters.min_miles or '' }}" /></label>
+          <label>Max Miles <input type="number" name="max_miles" value="{{ filters.max_miles or '' }}" /></label>
+          <label>Trim <input type="text" name="trim" value="{{ filters.trim or '' }}" /></label>
+          <label>Year Min <input type="number" name="year_min" value="{{ filters.year_min or '' }}" /></label>
+          <label>Year Max <input type="number" name="year_max" value="{{ filters.year_max or '' }}" /></label>
+          <button id="apply-btn" class="btn apply" type="submit">Apply Filters</button>
+        </form>
+
+        <div
+          id="progress-box"
+          class="status {% if run_status == 'success' %}success{% elif run_status %}failed{% else %}neutral{% endif %}"
+        >
+          {% if run_status %}
+          Last refresh: <strong>{{ run_status }}</strong> | found: {{ found or 0 }} | upserted:
+          {{ upserted or 0 }}
+          {% if error %}
+          <br />
+          Error: {{ error }}
+          {% endif %}
+          {% elif latest_run %}
+          Last refresh on {{ latest_run.ended_at or latest_run.started_at }}:
+          <strong>{{ latest_run.status }}</strong> | found: {{ latest_run.items_found }} | upserted:
+          {{ latest_run.items_upserted }}
+          {% if latest_run.error_text %}
+          <br />
+          Error: {{ latest_run.error_text }}
+          {% endif %}
+          {% else %}
+          No refresh run yet. Click <strong>Refresh Listings</strong> to fetch data from MarketCheck.
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Model Y (HW4 likely) in {{ filters.state }}</h2>
+          <span class="pill">{{ model_y_results|length }} matches</span>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">Model Y Scatter: Mileage (X) vs Price (Y)</div>
+          <svg id="chart-model-y" class="scatter-chart"></svg>
+          <div id="chart-model-y-empty" class="chart-empty muted"></div>
+        </div>
+        <div class="table-wrap">
+          <table id="table-model-y">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Trim</th>
+                <th>Price</th>
+                <th>Mileage</th>
+                <th>City</th>
+                <th>Dealer</th>
+                <th>VIN</th>
+                <th>Reason</th>
+                <th>URL</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in model_y_results %}
+              <tr
+                id="row-{{ row.id }}"
+                class="model-y-row"
+                data-row-id="{{ row.id }}"
+                data-price="{{ row.price or '' }}"
+                data-mileage="{{ row.mileage or '' }}"
+                data-trim="{{ row.trim or '' }}"
+              >
+                <td>{{ row.year or '' }}</td>
+                <td>{{ row.trim or '' }}</td>
+                <td>{{ row.price or '' }}</td>
+                <td>{{ row.mileage or '' }}</td>
+                <td>{{ row.city or '' }}</td>
+                <td>{{ row.dealer_name or '' }}</td>
+                <td>{{ row.vin or '' }}</td>
+                <td>{{ row.hw4_reason }}</td>
+                <td>{% if row.url %}<a href="{{ row.url }}" target="_blank">Open</a>{% endif %}</td>
+              </tr>
+              {% else %}
+              <tr><td class="muted" colspan="9">No results.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Model 3 (2024+) in {{ filters.state }}</h2>
+          <span class="pill">{{ model_3_results|length }} matches</span>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">Model 3 Scatter: Mileage (X) vs Price (Y)</div>
+          <svg id="chart-model-3" class="scatter-chart"></svg>
+          <div id="chart-model-3-empty" class="chart-empty muted"></div>
+        </div>
+        <div class="table-wrap">
+          <table id="table-model-3">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Trim</th>
+                <th>Price</th>
+                <th>Mileage</th>
+                <th>City</th>
+                <th>Dealer</th>
+                <th>VIN</th>
+                <th>URL</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in model_3_results %}
+              <tr
+                id="row-{{ row.id }}"
+                class="model-3-row"
+                data-row-id="{{ row.id }}"
+                data-price="{{ row.price or '' }}"
+                data-mileage="{{ row.mileage or '' }}"
+                data-trim="{{ row.trim or '' }}"
+              >
+                <td>{{ row.year or '' }}</td>
+                <td>{{ row.trim or '' }}</td>
+                <td>{{ row.price or '' }}</td>
+                <td>{{ row.mileage or '' }}</td>
+                <td>{{ row.city or '' }}</td>
+                <td>{{ row.dealer_name or '' }}</td>
+                <td>{{ row.vin or '' }}</td>
+                <td>{% if row.url %}<a href="{{ row.url }}" target="_blank">Open</a>{% endif %}</td>
+              </tr>
+              {% else %}
+              <tr><td class="muted" colspan="8">No results.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <script>
+      (() => {
+        const progressBox = document.getElementById("progress-box");
+        const refreshForm = document.getElementById("refresh-form");
+        const refreshBtn = document.getElementById("refresh-btn");
+        const filterForm = document.getElementById("filter-form");
+        const applyBtn = document.getElementById("apply-btn");
+        const svgNs = "http://www.w3.org/2000/svg";
+
+        const setProgress = (message, stateClass) => {
+          if (!progressBox) return;
+          progressBox.classList.remove("neutral", "success", "failed", "working");
+          progressBox.classList.add(stateClass);
+          progressBox.textContent = message;
+        };
+
+        if (refreshForm) {
+          refreshForm.addEventListener("submit", () => {
+            if (refreshBtn) {
+              refreshBtn.disabled = true;
+              refreshBtn.textContent = "Refreshing...";
+            }
+            setProgress(
+              "Refresh started. Pulling latest MarketCheck listings and updating local SQLite...",
+              "working"
+            );
+          });
+        }
+
+        if (filterForm) {
+          filterForm.addEventListener("submit", () => {
+            if (applyBtn) {
+              applyBtn.disabled = true;
+              applyBtn.textContent = "Applying...";
+            }
+            setProgress(
+              "Applying filters to local database results (no API call).",
+              "working"
+            );
+          });
+        }
+
+        const fmt = (value) => {
+          if (!Number.isFinite(value)) return "";
+          return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(value);
+        };
+
+        const createSvgEl = (name, attrs = {}) => {
+          const el = document.createElementNS(svgNs, name);
+          Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, String(v)));
+          return el;
+        };
+
+        const getTrimColor = (trim, fallback) => {
+          const text = String(trim || "").toLowerCase();
+          if (text.includes("performance")) return "#dc2626";
+          if (text.includes("long range") || text.includes("premium")) return "#16a34a";
+          if (text.includes("base") || text.includes("standard")) return "#ca8a04";
+          return fallback;
+        };
+
+        const renderScatterChart = ({ svgId, emptyId, rowSelector, fallbackColor }) => {
+          const svg = document.getElementById(svgId);
+          const emptyEl = document.getElementById(emptyId);
+          if (!svg) return;
+
+          const width = Math.max(600, Math.floor(svg.clientWidth || 760));
+          const height = Math.max(280, Math.floor(svg.clientHeight || 300));
+          svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+          svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+          svg.innerHTML = "";
+
+          const rows = Array.from(document.querySelectorAll(rowSelector));
+          const points = rows
+            .map((row) => ({
+              row,
+              rowId: row.dataset.rowId || "",
+              x: Number(row.dataset.mileage),
+              y: Number(row.dataset.price),
+              trim: row.dataset.trim || "",
+            }))
+            .filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
+
+          if (!points.length) {
+            if (emptyEl) {
+              emptyEl.textContent =
+                "No scatter points yet. Need both mileage and price values in table rows.";
+            }
+            return;
+          }
+          if (emptyEl) {
+            emptyEl.textContent = "Tip: click a dot to highlight its table row.";
+          }
+
+          const pad = { top: 18, right: 16, bottom: 44, left: 62 };
+          const plotW = width - pad.left - pad.right;
+          const plotH = height - pad.top - pad.bottom;
+
+          let minX = Math.min(...points.map((p) => p.x));
+          let maxX = Math.max(...points.map((p) => p.x));
+          let minY = Math.min(...points.map((p) => p.y));
+          let maxY = Math.max(...points.map((p) => p.y));
+
+          if (minX === maxX) {
+            minX -= 1;
+            maxX += 1;
+          }
+          if (minY === maxY) {
+            minY -= 1;
+            maxY += 1;
+          }
+
+          const xPad = (maxX - minX) * 0.06;
+          const yPad = (maxY - minY) * 0.08;
+          minX -= xPad;
+          maxX += xPad;
+          minY -= yPad;
+          maxY += yPad;
+
+          const xScale = (x) => pad.left + ((x - minX) / (maxX - minX)) * plotW;
+          const yScale = (y) => pad.top + (1 - (y - minY) / (maxY - minY)) * plotH;
+
+          const grid = createSvgEl("g", { stroke: "#e5e7eb", "stroke-width": 1 });
+          const axes = createSvgEl("g", { stroke: "#64748b", "stroke-width": 1.25 });
+          const labels = createSvgEl("g", {
+            fill: "#475569",
+            "font-size": 11,
+            "font-family": "Segoe UI, sans-serif",
+          });
+          const dots = createSvgEl("g");
+
+          for (let i = 0; i <= 4; i += 1) {
+            const tx = i / 4;
+            const x = pad.left + tx * plotW;
+            const y = pad.top + tx * plotH;
+
+            grid.appendChild(
+              createSvgEl("line", { x1: x, y1: pad.top, x2: x, y2: pad.top + plotH })
+            );
+            grid.appendChild(
+              createSvgEl("line", { x1: pad.left, y1: y, x2: pad.left + plotW, y2: y })
+            );
+
+            const xVal = minX + tx * (maxX - minX);
+            const yVal = maxY - tx * (maxY - minY);
+
+            const xText = createSvgEl("text", { x, y: pad.top + plotH + 16, "text-anchor": "middle" });
+            xText.textContent = fmt(xVal);
+            labels.appendChild(xText);
+
+            const yText = createSvgEl("text", {
+              x: pad.left - 8,
+              y: y + 4,
+              "text-anchor": "end",
+            });
+            yText.textContent = fmt(yVal);
+            labels.appendChild(yText);
+          }
+
+          axes.appendChild(
+            createSvgEl("line", {
+              x1: pad.left,
+              y1: pad.top + plotH,
+              x2: pad.left + plotW,
+              y2: pad.top + plotH,
+            })
+          );
+          axes.appendChild(
+            createSvgEl("line", { x1: pad.left, y1: pad.top, x2: pad.left, y2: pad.top + plotH })
+          );
+
+          const xLabel = createSvgEl("text", {
+            x: pad.left + plotW / 2,
+            y: height - 10,
+            "text-anchor": "middle",
+            fill: "#0f172a",
+            "font-size": 12,
+          });
+          xLabel.textContent = "Mileage";
+
+          const yLabel = createSvgEl("text", {
+            x: 16,
+            y: pad.top + plotH / 2,
+            "text-anchor": "middle",
+            fill: "#0f172a",
+            "font-size": 12,
+            transform: `rotate(-90 16 ${pad.top + plotH / 2})`,
+          });
+          yLabel.textContent = "Price";
+
+          let selectedRow = null;
+          let selectedDot = null;
+
+          const selectPoint = (rowEl, dotEl) => {
+            if (selectedRow) selectedRow.classList.remove("row-selected");
+            if (selectedDot) selectedDot.classList.remove("selected");
+            selectedRow = rowEl;
+            selectedDot = dotEl;
+            if (selectedRow) selectedRow.classList.add("row-selected");
+            if (selectedDot) selectedDot.classList.add("selected");
+            if (selectedRow) {
+              selectedRow.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+          };
+
+          points.forEach((point) => {
+            const cx = xScale(point.x);
+            const cy = yScale(point.y);
+            const dot = createSvgEl("circle", {
+              cx,
+              cy,
+              r: 5,
+              fill: getTrimColor(point.trim, fallbackColor),
+              class: "dot-point",
+              "vector-effect": "non-scaling-stroke",
+            });
+            const tooltip = createSvgEl("title");
+            tooltip.textContent = `Trim: ${point.trim || "Unknown"} | Mileage: ${fmt(point.x)} | Price: ${fmt(point.y)}`;
+            dot.appendChild(tooltip);
+
+            dot.addEventListener("click", () => selectPoint(point.row, dot));
+            point.row.addEventListener("click", () => selectPoint(point.row, dot));
+
+            dots.appendChild(dot);
+          });
+
+          svg.appendChild(grid);
+          svg.appendChild(axes);
+          svg.appendChild(labels);
+          svg.appendChild(dots);
+          svg.appendChild(xLabel);
+          svg.appendChild(yLabel);
+        };
+
+        renderScatterChart({
+          svgId: "chart-model-y",
+          emptyId: "chart-model-y-empty",
+          rowSelector: "tr.model-y-row",
+          fallbackColor: "#0f766e",
+        });
+        renderScatterChart({
+          svgId: "chart-model-3",
+          emptyId: "chart-model-3-empty",
+          rowSelector: "tr.model-3-row",
+          fallbackColor: "#2563eb",
+        });
+      })();
+    </script>
+  </body>
+</html>

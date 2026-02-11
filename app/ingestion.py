@@ -1,0 +1,446 @@
+from __future__ import annotations
+
+import hashlib
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
+from urllib.parse import urlparse
+
+from sqlalchemy import and_, or_, select
+from sqlalchemy.orm import Session
+
+from app.config import get_settings
+from app.hw4 import is_hw4_likely_model_y, normalize_vin
+from app.marketcheck import MarketCheckClient
+from app.models import Listing, RunLog, utcnow
+
+
+def _to_int(value: Any) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    if isinstance(value, str):
+        digits = "".join(ch for ch in value if ch.isdigit())
+        if digits:
+            return int(digits)
+    return None
+
+
+def _normalize_state(value: str | None) -> str | None:
+    if not value:
+        return None
+    text = value.strip().upper()
+    if len(text) >= 2:
+        return text[:2]
+    return text or None
+
+
+def normalize_model(value: str | None) -> str | None:
+    if not value:
+        return None
+    text = value.strip().lower().replace("-", " ")
+    if "model y" in text:
+        return "Y"
+    if "model 3" in text or text.endswith(" 3") or text == "3":
+        return "3"
+    if text == "y":
+        return "Y"
+    return None
+
+
+def build_fingerprint(
+    source: str, heading: str | None, price: int | None, city: str | None
+) -> str:
+    key = f"{source}|{(heading or '').strip().lower()}|{price or ''}|{(city or '').strip().lower()}"
+    return hashlib.sha256(key.encode("utf-8")).hexdigest()
+
+
+def _pick(item: dict[str, Any], *keys: str) -> Any:
+    for key in keys:
+        value = item.get(key)
+        if value not in (None, ""):
+            return value
+    return None
+
+
+def _pick_nested(item: dict[str, Any], nested: tuple[str, str], fallback: Any = None) -> Any:
+    parent = item.get(nested[0])
+    if isinstance(parent, dict):
+        value = parent.get(nested[1])
+        if value not in (None, ""):
+            return value
+    return fallback
+
+
+def _domain_to_vendor_name(raw: str | None) -> str | None:
+    if not raw:
+        return None
+    text = raw.strip()
+    if not text:
+        return None
+
+    candidate = text
+    if "://" in text:
+        parsed = urlparse(text)
+        candidate = parsed.hostname or ""
+    else:
+        parsed = urlparse(f"//{text}")
+        candidate = parsed.hostname or text
+
+    candidate = candidate.strip().lower()
+    if not candidate:
+        return None
+    if ":" in candidate:
+        candidate = candidate.split(":", 1)[0]
+    if candidate.startswith("www."):
+        candidate = candidate[4:]
+
+    parts = [p for p in candidate.split(".") if p]
+    if not parts:
+        return None
+    if len(parts) == 1:
+        base = parts[0]
+    elif len(parts) >= 3 and parts[-2] in {"co", "com", "org", "net", "gov", "ac"}:
+        base = parts[-3]
+    else:
+        base = parts[-2]
+
+    base = base.replace("-", " ").replace("_", " ").strip()
+    if not base:
+        return None
+    return " ".join(word.capitalize() for word in base.split())
+
+
+def derive_vendor_name(item: dict[str, Any], url: str | None = None) -> str | None:
+    for candidate in (
+        _pick(item, "dealer_name"),
+        _pick_nested(item, ("dealer", "name")),
+        _pick_nested(item, ("mc_dealership", "name")),
+    ):
+        if candidate:
+            text = str(candidate).strip()
+            if text:
+                return text
+
+    source = _pick(item, "source")
+    if source:
+        source_text = str(source).strip().lower()
+        # Skip short/internal source markers (e.g., "mc"), and only parse source when it
+        # looks like a hostname/URL.
+        if source_text not in {"mc", "marketcheck"} and (
+            "." in source_text or "://" in source_text or "/" in source_text
+        ):
+            source_name = _domain_to_vendor_name(source_text)
+            if source_name:
+                return source_name
+
+    url_name = _domain_to_vendor_name(url)
+    if url_name:
+        return url_name
+    return None
+
+
+def adapt_marketcheck_item(item: dict[str, Any]) -> dict[str, Any]:
+    raw_model = _pick(item, "model", "model_name")
+    heading = _pick(item, "heading", "title")
+    model = normalize_model(str(raw_model or heading or ""))
+
+    vin = normalize_vin(str(_pick(item, "vin") or "").strip() or None)
+    year = _to_int(_pick(item, "year") or _pick_nested(item, ("build", "year")))
+    trim = _pick(item, "trim") or _pick_nested(item, ("build", "trim"))
+    price = _to_int(_pick(item, "price", "msrp", "selling_price"))
+    mileage = _to_int(_pick(item, "miles", "mileage", "odometer"))
+    city = _pick(item, "city") or _pick_nested(item, ("dealer", "city"))
+    state = _normalize_state(
+        _pick(item, "state") or _pick_nested(item, ("dealer", "state"))
+    )
+    url = _pick(item, "vdp_url", "url", "vehicle_url")
+    dealer_name = derive_vendor_name(item, str(url) if url else None)
+    photos = (
+        _pick(item, "photo_links", "photos", "image_urls")
+        or _pick_nested(item, ("media", "photo_links"))
+    )
+
+    hw4_likely = False
+    hw4_reason = "HW4 heuristic applies only to Model Y."
+    if model == "Y":
+        hw4_likely, hw4_reason = is_hw4_likely_model_y(vin)
+
+    return {
+        "source": "marketcheck",
+        "url": str(url) if url else None,
+        "vin": vin,
+        "model": model,
+        "year": year,
+        "trim": str(trim) if trim else None,
+        "price": price,
+        "mileage": mileage,
+        "city": str(city) if city else None,
+        "state": state,
+        "dealer_name": str(dealer_name) if dealer_name else None,
+        "hw4_likely": hw4_likely,
+        "hw4_reason": hw4_reason,
+        "heading": str(heading) if heading else None,
+        "photos": photos,
+        "raw": item,
+    }
+
+
+def _find_existing(session: Session, payload: dict[str, Any]) -> Listing | None:
+    source = payload["source"]
+    vin = payload.get("vin")
+    url = payload.get("url")
+    fingerprint = payload.get("fingerprint")
+
+    if vin:
+        existing = session.execute(
+            select(Listing).where(Listing.vin == vin).limit(1)
+        ).scalar_one_or_none()
+        if existing:
+            return existing
+
+    if url:
+        existing = session.execute(
+            select(Listing)
+            .where(and_(Listing.source == source, Listing.url == url))
+            .limit(1)
+        ).scalar_one_or_none()
+        if existing:
+            return existing
+
+    if fingerprint:
+        return session.execute(
+            select(Listing)
+            .where(and_(Listing.source == source, Listing.fingerprint == fingerprint))
+            .limit(1)
+        ).scalar_one_or_none()
+    return None
+
+
+def _prepare_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    prepared = dict(payload)
+    prepared["source"] = str(prepared.get("source") or "marketcheck")
+
+    raw_vin = prepared.get("vin")
+    if raw_vin is None:
+        prepared["vin"] = None
+    else:
+        prepared["vin"] = normalize_vin(str(raw_vin))
+
+    raw_url = prepared.get("url")
+    if raw_url is None:
+        prepared["url"] = None
+    else:
+        url = str(raw_url).strip()
+        prepared["url"] = url or None
+
+    price = _to_int(prepared.get("price"))
+    heading = prepared.get("heading")
+    city = prepared.get("city")
+    vin = prepared.get("vin")
+    url = prepared.get("url")
+    if vin or url:
+        prepared["fingerprint"] = None
+    else:
+        prepared["fingerprint"] = build_fingerprint(
+            prepared["source"],
+            str(heading) if heading is not None else None,
+            price,
+            str(city) if city is not None else None,
+        )
+    return prepared
+
+
+def _batch_dedupe_payloads(adapted_listings: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    deduped: dict[tuple[str, ...], dict[str, Any]] = {}
+    for payload in adapted_listings:
+        prepared = _prepare_payload(payload)
+        source = prepared["source"]
+        vin = prepared.get("vin")
+        url = prepared.get("url")
+        fingerprint = prepared.get("fingerprint")
+
+        if vin:
+            key = ("vin", vin)
+        elif url:
+            key = ("url", source, url)
+        else:
+            # Fingerprint is always set when VIN and URL are both missing.
+            key = ("fingerprint", source, str(fingerprint))
+
+        # Keep the latest entry in the batch for a stable "last write wins" behavior.
+        deduped[key] = prepared
+    return list(deduped.values())
+
+
+def upsert_listings(
+    session: Session,
+    adapted_listings: list[dict[str, Any]],
+    now: datetime | None = None,
+) -> int:
+    now = now or utcnow()
+    upserted = 0
+
+    for payload in _batch_dedupe_payloads(adapted_listings):
+        price = _to_int(payload.get("price"))
+        city = payload.get("city")
+
+        existing = _find_existing(session, payload)
+        if existing:
+            existing.url = payload.get("url")
+            existing.vin = payload.get("vin")
+            existing.model = payload.get("model")
+            existing.year = _to_int(payload.get("year"))
+            existing.trim = payload.get("trim")
+            existing.price = price
+            existing.mileage = _to_int(payload.get("mileage"))
+            existing.city = city
+            existing.state = _normalize_state(payload.get("state"))
+            existing.dealer_name = payload.get("dealer_name")
+            existing.hw4_likely = bool(payload.get("hw4_likely", False))
+            existing.hw4_reason = str(payload.get("hw4_reason") or "")
+            existing.fingerprint = payload.get("fingerprint")
+            existing.raw = payload.get("raw") or {}
+            existing.last_seen = now
+            upserted += 1
+            continue
+
+        listing = Listing(
+            source=str(payload.get("source") or "marketcheck"),
+            url=payload.get("url"),
+            vin=payload.get("vin"),
+            model=payload.get("model"),
+            year=_to_int(payload.get("year")),
+            trim=payload.get("trim"),
+            price=price,
+            mileage=_to_int(payload.get("mileage")),
+            city=payload.get("city"),
+            state=_normalize_state(payload.get("state")),
+            dealer_name=payload.get("dealer_name"),
+            first_seen=now,
+            last_seen=now,
+            hw4_likely=bool(payload.get("hw4_likely", False)),
+            hw4_reason=str(payload.get("hw4_reason") or ""),
+            fingerprint=payload.get("fingerprint"),
+            raw=payload.get("raw") or {},
+        )
+        session.add(listing)
+        upserted += 1
+
+    session.commit()
+    return upserted
+
+
+def fetch_marketcheck_listings(
+    state: str = "MA",
+    make: str = "Tesla",
+    models: list[str] | None = None,
+    extra_filters: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    settings = get_settings()
+    client = MarketCheckClient(settings)
+    return client.fetch_marketcheck_listings(
+        state=state, make=make, models=models or ["Model 3", "Model Y"], extra_filters=extra_filters
+    )
+
+
+def refresh_marketcheck(
+    session: Session, state: str | None = None, extra_filters: dict[str, Any] | None = None
+) -> RunLog:
+    settings = get_settings()
+    run = RunLog(status="running", started_at=utcnow(), items_found=0, items_upserted=0)
+    session.add(run)
+    session.commit()
+
+    try:
+        listings = fetch_marketcheck_listings(
+            state=(state or settings.default_state).upper(),
+            make="Tesla",
+            models=["Model 3", "Model Y"],
+            extra_filters=extra_filters,
+        )
+        adapted = [adapt_marketcheck_item(item) for item in listings]
+        upserted = upsert_listings(session, adapted)
+        run.status = "success"
+        run.items_found = len(listings)
+        run.items_upserted = upserted
+    except Exception as exc:  # noqa: BLE001
+        session.rollback()
+        run.status = "failed"
+        run.error_text = str(exc)
+    finally:
+        run.ended_at = utcnow()
+        session.add(run)
+        session.commit()
+    return run
+
+
+@dataclass
+class ListingFilters:
+    state: str
+    min_price: int | None = None
+    max_price: int | None = None
+    min_miles: int | None = None
+    max_miles: int | None = None
+    trim: str | None = None
+    year_min: int | None = None
+    year_max: int | None = None
+
+
+def _apply_common_filters(stmt, filters: ListingFilters):
+    stmt = stmt.where(Listing.state == filters.state.upper())
+
+    if filters.min_price is not None:
+        stmt = stmt.where(Listing.price.is_not(None), Listing.price >= filters.min_price)
+    if filters.max_price is not None:
+        stmt = stmt.where(Listing.price.is_not(None), Listing.price <= filters.max_price)
+    if filters.min_miles is not None:
+        stmt = stmt.where(Listing.mileage.is_not(None), Listing.mileage >= filters.min_miles)
+    if filters.max_miles is not None:
+        stmt = stmt.where(Listing.mileage.is_not(None), Listing.mileage <= filters.max_miles)
+    if filters.trim:
+        stmt = stmt.where(Listing.trim.is_not(None), Listing.trim.ilike(f"%{filters.trim}%"))
+    if filters.year_min is not None:
+        stmt = stmt.where(Listing.year.is_not(None), Listing.year >= filters.year_min)
+    if filters.year_max is not None:
+        stmt = stmt.where(Listing.year.is_not(None), Listing.year <= filters.year_max)
+    return stmt
+
+
+def query_model_y_hw4(session: Session, filters: ListingFilters) -> list[Listing]:
+    stmt = select(Listing).where(
+        Listing.source == "marketcheck", Listing.model == "Y", Listing.hw4_likely.is_(True)
+    )
+    stmt = _apply_common_filters(stmt, filters)
+    stmt = stmt.order_by(Listing.last_seen.desc(), Listing.price.asc())
+    return list(session.execute(stmt).scalars().all())
+
+
+def query_model3_2024(session: Session, filters: ListingFilters) -> list[Listing]:
+    stmt = select(Listing).where(
+        Listing.source == "marketcheck",
+        Listing.model == "3",
+        Listing.year.is_not(None),
+        Listing.year >= 2024,
+    )
+    stmt = _apply_common_filters(stmt, filters)
+    stmt = stmt.order_by(Listing.last_seen.desc(), Listing.price.asc())
+    return list(session.execute(stmt).scalars().all())
+
+
+def query_export_rows(session: Session, filters: ListingFilters) -> list[Listing]:
+    base = select(Listing).where(
+        Listing.source == "marketcheck",
+        or_(
+            and_(Listing.model == "Y", Listing.hw4_likely.is_(True)),
+            and_(Listing.model == "3", Listing.year.is_not(None), Listing.year >= 2024),
+        ),
+    )
+    stmt = _apply_common_filters(base, filters)
+    stmt = stmt.order_by(Listing.model.asc(), Listing.price.asc())
+    return list(session.execute(stmt).scalars().all())
