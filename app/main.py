@@ -17,6 +17,7 @@ from app.ingestion import (
     query_export_rows,
     query_model3_2024,
     query_model_y_hw4,
+    query_trim_options,
     refresh_marketcheck,
 )
 from app.models import Listing, RunLog
@@ -40,6 +41,8 @@ def _build_filters(
     trim: str | None = None,
     year_min: int | None = None,
     year_max: int | None = None,
+    clean_title_values: tuple[str, ...] = (),
+    one_owner_values: tuple[str, ...] = (),
 ) -> ListingFilters:
     return ListingFilters(
         state=(state or settings_state).upper(),
@@ -50,6 +53,8 @@ def _build_filters(
         trim=trim,
         year_min=year_min,
         year_max=year_max,
+        clean_title_values=clean_title_values,
+        one_owner_values=one_owner_values,
     )
 
 
@@ -63,6 +68,38 @@ def _parse_optional_int(value: str | None) -> int | None:
         return int(text)
     except ValueError:
         return None
+
+
+def _parse_carfax_values(values: list[str] | None) -> tuple[str, ...]:
+    if not values:
+        return ()
+
+    parsed: list[str] = []
+    seen: set[str] = set()
+    for raw in values:
+        text = str(raw).strip().lower()
+        if text in {"1", "true", "yes", "y"}:
+            normalized = "yes"
+        elif text in {"0", "false", "no", "n"}:
+            normalized = "no"
+        elif text in {"unknown", "unk", "none", "null"}:
+            normalized = "unknown"
+        else:
+            continue
+
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        parsed.append(normalized)
+    return tuple(parsed)
+
+
+def _merge_history_values(*groups: list[str] | None) -> tuple[str, ...]:
+    merged: list[str] = []
+    for group in groups:
+        if group:
+            merged.extend(group)
+    return _parse_carfax_values(merged)
 
 
 def _serialize_listing(row: Listing) -> dict:
@@ -98,6 +135,12 @@ def index(
     trim: str | None = Query(None),
     year_min: str | None = Query(None),
     year_max: str | None = Query(None),
+    clean_title: list[str] | None = Query(None),
+    one_owner: list[str] | None = Query(None),
+    carfax_clean_title: list[str] | None = Query(None),
+    carfax_1_owner: list[str] | None = Query(None),
+    autocheck_clean_title: list[str] | None = Query(None),
+    autocheck_1_owner: list[str] | None = Query(None),
     run_status: str | None = Query(None),
     found: int | None = Query(None),
     upserted: int | None = Query(None),
@@ -115,17 +158,26 @@ def index(
         trim=trim,
         year_min=_parse_optional_int(year_min),
         year_max=_parse_optional_int(year_max),
+        clean_title_values=_merge_history_values(
+            clean_title, carfax_clean_title, autocheck_clean_title
+        ),
+        one_owner_values=_merge_history_values(
+            one_owner, carfax_1_owner, autocheck_1_owner
+        ),
     )
     model_y = query_model_y_hw4(db, filters)
     model_3 = query_model3_2024(db, filters)
+    trim_options = query_trim_options(db, filters)
     latest_run = db.execute(
         select(RunLog).order_by(RunLog.started_at.desc()).limit(1)
     ).scalar_one_or_none()
 
-    query_dict = dict(request.query_params)
-    for key in ("run_status", "found", "upserted", "error"):
-        query_dict.pop(key, None)
-    qs = urlencode(query_dict)
+    query_pairs = [
+        (key, value)
+        for key, value in request.query_params.multi_items()
+        if key not in {"run_status", "found", "upserted", "error"}
+    ]
+    qs = urlencode(query_pairs, doseq=True)
     suffix = f"?{qs}" if qs else ""
 
     return templates.TemplateResponse(
@@ -135,6 +187,7 @@ def index(
             "filters": filters,
             "model_y_results": model_y,
             "model_3_results": model_3,
+            "trim_options": trim_options,
             "refresh_action": f"/refresh{suffix}",
             "export_csv_url": f"/export.csv{suffix}",
             "export_json_url": f"/export.json{suffix}",
@@ -156,15 +209,15 @@ def refresh(
     settings = get_settings()
     run = refresh_marketcheck(db, state=(state or settings.default_state))
 
-    query_dict = dict(request.query_params)
-    query_dict["run_status"] = run.status
-    query_dict["found"] = str(run.items_found)
-    query_dict["upserted"] = str(run.items_upserted)
+    query_pairs = list(request.query_params.multi_items())
+    query_pairs.append(("run_status", run.status))
+    query_pairs.append(("found", str(run.items_found)))
+    query_pairs.append(("upserted", str(run.items_upserted)))
     if run.error_text:
-        query_dict["error"] = run.error_text
+        query_pairs.append(("error", run.error_text))
     redirect_to = "/"
-    if query_dict:
-        redirect_to = f"/?{urlencode(query_dict)}"
+    if query_pairs:
+        redirect_to = f"/?{urlencode(query_pairs, doseq=True)}"
     return RedirectResponse(url=redirect_to, status_code=303)
 
 
@@ -178,6 +231,12 @@ def export_json(
     trim: str | None = Query(None),
     year_min: str | None = Query(None),
     year_max: str | None = Query(None),
+    clean_title: list[str] | None = Query(None),
+    one_owner: list[str] | None = Query(None),
+    carfax_clean_title: list[str] | None = Query(None),
+    carfax_1_owner: list[str] | None = Query(None),
+    autocheck_clean_title: list[str] | None = Query(None),
+    autocheck_1_owner: list[str] | None = Query(None),
     db: Session = Depends(get_db),
 ):
     settings = get_settings()
@@ -191,6 +250,12 @@ def export_json(
         trim=trim,
         year_min=_parse_optional_int(year_min),
         year_max=_parse_optional_int(year_max),
+        clean_title_values=_merge_history_values(
+            clean_title, carfax_clean_title, autocheck_clean_title
+        ),
+        one_owner_values=_merge_history_values(
+            one_owner, carfax_1_owner, autocheck_1_owner
+        ),
     )
     rows = query_export_rows(db, filters)
     return JSONResponse(content=[_serialize_listing(row) for row in rows])
@@ -206,6 +271,12 @@ def export_csv(
     trim: str | None = Query(None),
     year_min: str | None = Query(None),
     year_max: str | None = Query(None),
+    clean_title: list[str] | None = Query(None),
+    one_owner: list[str] | None = Query(None),
+    carfax_clean_title: list[str] | None = Query(None),
+    carfax_1_owner: list[str] | None = Query(None),
+    autocheck_clean_title: list[str] | None = Query(None),
+    autocheck_1_owner: list[str] | None = Query(None),
     db: Session = Depends(get_db),
 ):
     settings = get_settings()
@@ -219,6 +290,12 @@ def export_csv(
         trim=trim,
         year_min=_parse_optional_int(year_min),
         year_max=_parse_optional_int(year_max),
+        clean_title_values=_merge_history_values(
+            clean_title, carfax_clean_title, autocheck_clean_title
+        ),
+        one_owner_values=_merge_history_values(
+            one_owner, carfax_1_owner, autocheck_1_owner
+        ),
     )
     rows = query_export_rows(db, filters)
 

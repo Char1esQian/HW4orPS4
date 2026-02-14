@@ -4,6 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>HW4 Finder</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
     <style>
       :root {
         --bg: #f5f4ef;
@@ -91,7 +97,8 @@
         color: var(--muted);
         font-size: 12px;
       }
-      .filters input {
+      .filters input,
+      .filters select {
         border: 1px solid var(--line);
         border-radius: 8px;
         background: #fff;
@@ -101,6 +108,33 @@
       }
       .filters .apply {
         align-self: end;
+      }
+      .filter-check-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--muted);
+        font-size: 12px;
+        padding: 8px 10px;
+      }
+      .filter-check-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .filter-check {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        color: #334155;
+        font-size: 12px;
+      }
+      .filter-check input[type="checkbox"] {
+        margin: 0;
+        accent-color: var(--accent);
       }
       table {
         border-collapse: collapse;
@@ -178,7 +212,7 @@
         border-radius: 12px;
         background: var(--paper);
         box-shadow: 0 6px 16px rgba(17, 24, 39, 0.04);
-        overflow: hidden;
+        overflow: visible;
       }
       .panel-header {
         display: flex;
@@ -205,10 +239,22 @@
         overflow-x: auto;
         padding: 0 10px 10px 10px;
       }
-      .chart-box {
-        padding: 12px 14px 8px 14px;
+      .viz-grid {
+        display: grid;
+        grid-template-columns: 1.7fr 1fr;
         border-bottom: 1px solid var(--line);
         background: #fdfefb;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.07);
+      }
+      .chart-box {
+        padding: 12px 14px 8px 14px;
+        border-right: 1px solid var(--line);
+      }
+      .map-box {
+        padding: 12px 14px 8px 14px;
       }
       .chart-title {
         font-size: 13px;
@@ -227,6 +273,16 @@
         margin-top: 8px;
         font-size: 12px;
       }
+      .dealer-map {
+        width: 100%;
+        height: 300px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+      .map-empty {
+        margin-top: 8px;
+        font-size: 12px;
+      }
       .dot-point {
         cursor: pointer;
         opacity: 0.9;
@@ -238,6 +294,46 @@
         stroke: #0f172a;
         stroke-width: 2.5;
       }
+      .color-cell {
+        min-width: 180px;
+      }
+      .color-pair {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-right: 8px;
+      }
+      .color-chip {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        border: 1px solid #94a3b8;
+        display: inline-block;
+      }
+      .carfax-badge {
+        display: inline-flex;
+        min-width: 44px;
+        justify-content: center;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 12px;
+        border: 1px solid transparent;
+      }
+      .carfax-badge.yes {
+        background: #ecfdf5;
+        color: #065f46;
+        border-color: #86efac;
+      }
+      .carfax-badge.no {
+        background: #fff7ed;
+        color: #9a3412;
+        border-color: #fdba74;
+      }
+      .carfax-badge.unknown {
+        background: #f8fafc;
+        color: #475569;
+        border-color: #cbd5e1;
+      }
       tr.row-selected td {
         background: #e0f2fe;
       }
@@ -247,6 +343,13 @@
       @media (max-width: 980px) {
         .filters {
           grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .viz-grid {
+          grid-template-columns: 1fr;
+        }
+        .chart-box {
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
         }
       }
       @media (max-width: 620px) {
@@ -289,9 +392,83 @@
           <label>Max Price <input type="number" name="max_price" value="{{ filters.max_price or '' }}" /></label>
           <label>Min Miles <input type="number" name="min_miles" value="{{ filters.min_miles or '' }}" /></label>
           <label>Max Miles <input type="number" name="max_miles" value="{{ filters.max_miles or '' }}" /></label>
-          <label>Trim <input type="text" name="trim" value="{{ filters.trim or '' }}" /></label>
+          <label>
+            Trim
+            <select name="trim">
+              <option value="">All Trims</option>
+              {% for trim_option in trim_options %}
+              <option value="{{ trim_option }}" {% if filters.trim == trim_option %}selected{% endif %}>
+                {{ trim_option }}
+              </option>
+              {% endfor %}
+            </select>
+          </label>
           <label>Year Min <input type="number" name="year_min" value="{{ filters.year_min or '' }}" /></label>
           <label>Year Max <input type="number" name="year_max" value="{{ filters.year_max or '' }}" /></label>
+          <div class="filter-check-group">
+            <span>Clean Title (Carfax + AutoCheck)</span>
+            <div class="filter-check-options">
+              <label class="filter-check">
+                <input
+                  type="checkbox"
+                  name="clean_title"
+                  value="yes"
+                  {% if "yes" in filters.clean_title_values %}checked{% endif %}
+                />
+                Yes
+              </label>
+              <label class="filter-check">
+                <input
+                  type="checkbox"
+                  name="clean_title"
+                  value="no"
+                  {% if "no" in filters.clean_title_values %}checked{% endif %}
+                />
+                No
+              </label>
+              <label class="filter-check">
+                <input
+                  type="checkbox"
+                  name="clean_title"
+                  value="unknown"
+                  {% if "unknown" in filters.clean_title_values %}checked{% endif %}
+                />
+                Unknown
+              </label>
+            </div>
+          </div>
+          <div class="filter-check-group">
+            <span>1 Owner (Carfax + AutoCheck)</span>
+            <div class="filter-check-options">
+              <label class="filter-check">
+                <input
+                  type="checkbox"
+                  name="one_owner"
+                  value="yes"
+                  {% if "yes" in filters.one_owner_values %}checked{% endif %}
+                />
+                Yes
+              </label>
+              <label class="filter-check">
+                <input
+                  type="checkbox"
+                  name="one_owner"
+                  value="no"
+                  {% if "no" in filters.one_owner_values %}checked{% endif %}
+                />
+                No
+              </label>
+              <label class="filter-check">
+                <input
+                  type="checkbox"
+                  name="one_owner"
+                  value="unknown"
+                  {% if "unknown" in filters.one_owner_values %}checked{% endif %}
+                />
+                Unknown
+              </label>
+            </div>
+          </div>
           <button id="apply-btn" class="btn apply" type="submit">Apply Filters</button>
         </form>
 
@@ -325,10 +502,17 @@
           <h2>Model Y (HW4 likely) in {{ filters.state }}</h2>
           <span class="pill">{{ model_y_results|length }} matches</span>
         </div>
-        <div class="chart-box">
-          <div class="chart-title">Model Y Scatter: Mileage (X) vs Price (Y)</div>
-          <svg id="chart-model-y" class="scatter-chart"></svg>
-          <div id="chart-model-y-empty" class="chart-empty muted"></div>
+        <div class="viz-grid">
+          <div class="chart-box">
+            <div class="chart-title">Model Y Scatter: Mileage (X) vs Price (Y)</div>
+            <svg id="chart-model-y" class="scatter-chart"></svg>
+            <div id="chart-model-y-empty" class="chart-empty muted"></div>
+          </div>
+          <div class="map-box">
+            <div class="chart-title">Dealer Map</div>
+            <div id="map-model-y" class="dealer-map"></div>
+            <div id="map-model-y-empty" class="map-empty muted"></div>
+          </div>
         </div>
         <div class="table-wrap">
           <table id="table-model-y">
@@ -338,6 +522,9 @@
                 <th>Trim</th>
                 <th>Price</th>
                 <th>Mileage</th>
+                <th>Colors</th>
+                <th>Carfax Clean</th>
+                <th>Carfax 1 Owner</th>
                 <th>City</th>
                 <th>Dealer</th>
                 <th>VIN</th>
@@ -354,11 +541,40 @@
                 data-price="{{ row.price or '' }}"
                 data-mileage="{{ row.mileage or '' }}"
                 data-trim="{{ row.trim or '' }}"
+                data-city="{{ row.city or '' }}"
+                data-dealer="{{ row.dealer_name or '' }}"
+                data-exterior-color="{{ row.raw.get('exterior_color') or row.raw.get('base_ext_color') or '' }}"
+                data-interior-color="{{ row.raw.get('interior_color') or row.raw.get('base_int_color') or '' }}"
+                data-carfax-clean-title="{{ row.raw.get('carfax_clean_title') if row.raw.get('carfax_clean_title') is not none else '' }}"
+                data-carfax-1-owner="{{ row.raw.get('carfax_1_owner') if row.raw.get('carfax_1_owner') is not none else '' }}"
+                data-latitude="{{ row.raw.get('dealer', {}).get('latitude') or row.raw.get('mc_dealership', {}).get('latitude') or '' }}"
+                data-longitude="{{ row.raw.get('dealer', {}).get('longitude') or row.raw.get('mc_dealership', {}).get('longitude') or '' }}"
               >
+                {% set ext_color = row.raw.get('exterior_color') or row.raw.get('base_ext_color') %}
+                {% set int_color = row.raw.get('interior_color') or row.raw.get('base_int_color') %}
+                {% set clean_title = row.raw.get('carfax_clean_title') %}
+                {% set one_owner = row.raw.get('carfax_1_owner') %}
                 <td>{{ row.year or '' }}</td>
                 <td>{{ row.trim or '' }}</td>
                 <td>{{ row.price or '' }}</td>
                 <td>{{ row.mileage or '' }}</td>
+                <td class="color-cell">
+                  <span class="color-pair">
+                    <span class="color-chip" data-color-name="{{ ext_color or '' }}" title="Exterior: {{ ext_color or 'Unknown' }}"></span>
+                    <span class="color-chip" data-color-name="{{ int_color or '' }}" title="Interior: {{ int_color or 'Unknown' }}"></span>
+                  </span>
+                  <span class="muted">{{ ext_color or "Unknown" }} / {{ int_color or "Unknown" }}</span>
+                </td>
+                <td>
+                  <span class="carfax-badge {% if clean_title is true %}yes{% elif clean_title is false %}no{% else %}unknown{% endif %}">
+                    {% if clean_title is true %}Yes{% elif clean_title is false %}No{% else %}Unknown{% endif %}
+                  </span>
+                </td>
+                <td>
+                  <span class="carfax-badge {% if one_owner is true %}yes{% elif one_owner is false %}no{% else %}unknown{% endif %}">
+                    {% if one_owner is true %}Yes{% elif one_owner is false %}No{% else %}Unknown{% endif %}
+                  </span>
+                </td>
                 <td>{{ row.city or '' }}</td>
                 <td>{{ row.dealer_name or '' }}</td>
                 <td>{{ row.vin or '' }}</td>
@@ -366,7 +582,7 @@
                 <td>{% if row.url %}<a href="{{ row.url }}" target="_blank">Open</a>{% endif %}</td>
               </tr>
               {% else %}
-              <tr><td class="muted" colspan="9">No results.</td></tr>
+              <tr><td class="muted" colspan="12">No results.</td></tr>
               {% endfor %}
             </tbody>
           </table>
@@ -378,10 +594,17 @@
           <h2>Model 3 (2024+) in {{ filters.state }}</h2>
           <span class="pill">{{ model_3_results|length }} matches</span>
         </div>
-        <div class="chart-box">
-          <div class="chart-title">Model 3 Scatter: Mileage (X) vs Price (Y)</div>
-          <svg id="chart-model-3" class="scatter-chart"></svg>
-          <div id="chart-model-3-empty" class="chart-empty muted"></div>
+        <div class="viz-grid">
+          <div class="chart-box">
+            <div class="chart-title">Model 3 Scatter: Mileage (X) vs Price (Y)</div>
+            <svg id="chart-model-3" class="scatter-chart"></svg>
+            <div id="chart-model-3-empty" class="chart-empty muted"></div>
+          </div>
+          <div class="map-box">
+            <div class="chart-title">Dealer Map</div>
+            <div id="map-model-3" class="dealer-map"></div>
+            <div id="map-model-3-empty" class="map-empty muted"></div>
+          </div>
         </div>
         <div class="table-wrap">
           <table id="table-model-3">
@@ -391,6 +614,9 @@
                 <th>Trim</th>
                 <th>Price</th>
                 <th>Mileage</th>
+                <th>Colors</th>
+                <th>Carfax Clean</th>
+                <th>Carfax 1 Owner</th>
                 <th>City</th>
                 <th>Dealer</th>
                 <th>VIN</th>
@@ -406,24 +632,58 @@
                 data-price="{{ row.price or '' }}"
                 data-mileage="{{ row.mileage or '' }}"
                 data-trim="{{ row.trim or '' }}"
+                data-city="{{ row.city or '' }}"
+                data-dealer="{{ row.dealer_name or '' }}"
+                data-exterior-color="{{ row.raw.get('exterior_color') or row.raw.get('base_ext_color') or '' }}"
+                data-interior-color="{{ row.raw.get('interior_color') or row.raw.get('base_int_color') or '' }}"
+                data-carfax-clean-title="{{ row.raw.get('carfax_clean_title') if row.raw.get('carfax_clean_title') is not none else '' }}"
+                data-carfax-1-owner="{{ row.raw.get('carfax_1_owner') if row.raw.get('carfax_1_owner') is not none else '' }}"
+                data-latitude="{{ row.raw.get('dealer', {}).get('latitude') or row.raw.get('mc_dealership', {}).get('latitude') or '' }}"
+                data-longitude="{{ row.raw.get('dealer', {}).get('longitude') or row.raw.get('mc_dealership', {}).get('longitude') or '' }}"
               >
+                {% set ext_color = row.raw.get('exterior_color') or row.raw.get('base_ext_color') %}
+                {% set int_color = row.raw.get('interior_color') or row.raw.get('base_int_color') %}
+                {% set clean_title = row.raw.get('carfax_clean_title') %}
+                {% set one_owner = row.raw.get('carfax_1_owner') %}
                 <td>{{ row.year or '' }}</td>
                 <td>{{ row.trim or '' }}</td>
                 <td>{{ row.price or '' }}</td>
                 <td>{{ row.mileage or '' }}</td>
+                <td class="color-cell">
+                  <span class="color-pair">
+                    <span class="color-chip" data-color-name="{{ ext_color or '' }}" title="Exterior: {{ ext_color or 'Unknown' }}"></span>
+                    <span class="color-chip" data-color-name="{{ int_color or '' }}" title="Interior: {{ int_color or 'Unknown' }}"></span>
+                  </span>
+                  <span class="muted">{{ ext_color or "Unknown" }} / {{ int_color or "Unknown" }}</span>
+                </td>
+                <td>
+                  <span class="carfax-badge {% if clean_title is true %}yes{% elif clean_title is false %}no{% else %}unknown{% endif %}">
+                    {% if clean_title is true %}Yes{% elif clean_title is false %}No{% else %}Unknown{% endif %}
+                  </span>
+                </td>
+                <td>
+                  <span class="carfax-badge {% if one_owner is true %}yes{% elif one_owner is false %}no{% else %}unknown{% endif %}">
+                    {% if one_owner is true %}Yes{% elif one_owner is false %}No{% else %}Unknown{% endif %}
+                  </span>
+                </td>
                 <td>{{ row.city or '' }}</td>
                 <td>{{ row.dealer_name or '' }}</td>
                 <td>{{ row.vin or '' }}</td>
                 <td>{% if row.url %}<a href="{{ row.url }}" target="_blank">Open</a>{% endif %}</td>
               </tr>
               {% else %}
-              <tr><td class="muted" colspan="8">No results.</td></tr>
+              <tr><td class="muted" colspan="11">No results.</td></tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
       </section>
     </main>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
     <script>
       (() => {
         const progressBox = document.getElementById("progress-box");
@@ -471,6 +731,62 @@
           return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(value);
         };
 
+        const escapeHtml = (value) =>
+          String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;");
+
+        const parseAxisValue = (raw, { allowZero = true } = {}) => {
+          if (raw === undefined || raw === null) return null;
+          const text = String(raw).trim();
+          if (!text) return null;
+          const num = Number(text);
+          if (!Number.isFinite(num)) return null;
+          if (num < 0) return null;
+          if (!allowZero && num === 0) return null;
+          return num;
+        };
+
+        const parseCoordinate = (raw, min, max) => {
+          if (raw === undefined || raw === null) return null;
+          const text = String(raw).trim();
+          if (!text) return null;
+          const num = Number(text);
+          if (!Number.isFinite(num)) return null;
+          if (num < min || num > max) return null;
+          return num;
+        };
+
+        const colorFromName = (name) => {
+          const text = String(name || "").trim().toLowerCase();
+          if (!text) return "#e2e8f0";
+          if (text.includes("white") || text.includes("pearl") || text.includes("ivory")) return "#f8fafc";
+          if (text.includes("black") || text.includes("obsidian")) return "#111827";
+          if (text.includes("silver") || text.includes("gray") || text.includes("grey")) return "#94a3b8";
+          if (text.includes("blue") || text.includes("navy")) return "#2563eb";
+          if (text.includes("red") || text.includes("crimson")) return "#dc2626";
+          if (text.includes("green")) return "#16a34a";
+          if (text.includes("brown") || text.includes("tan") || text.includes("beige")) return "#b45309";
+          if (text.includes("orange")) return "#ea580c";
+          if (text.includes("yellow") || text.includes("gold")) return "#ca8a04";
+          if (text.includes("purple")) return "#7e22ce";
+          return "#64748b";
+        };
+
+        const applyColorSwatches = () => {
+          const chips = document.querySelectorAll(".color-chip[data-color-name]");
+          chips.forEach((chip) => {
+            const name = chip.dataset.colorName || "";
+            chip.style.background = colorFromName(name);
+            if (!name) {
+              chip.style.backgroundImage =
+                "repeating-linear-gradient(45deg, #e2e8f0, #e2e8f0 3px, #cbd5e1 3px, #cbd5e1 6px)";
+            }
+          });
+        };
+
         const createSvgEl = (name, attrs = {}) => {
           const el = document.createElementNS(svgNs, name);
           Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, String(v)));
@@ -485,189 +801,295 @@
           return fallback;
         };
 
-        const renderScatterChart = ({ svgId, emptyId, rowSelector, fallbackColor }) => {
+        const renderPanel = ({
+          svgId,
+          emptyId,
+          mapId,
+          mapEmptyId,
+          rowSelector,
+          fallbackColor,
+        }) => {
           const svg = document.getElementById(svgId);
           const emptyEl = document.getElementById(emptyId);
+          const mapEl = document.getElementById(mapId);
+          const mapEmptyEl = document.getElementById(mapEmptyId);
           if (!svg) return;
+
+          const rows = Array.from(document.querySelectorAll(rowSelector));
+          const rowContexts = rows.map((row) => ({
+            row,
+            rowId: row.dataset.rowId || "",
+            trim: row.dataset.trim || "",
+            dealer: row.dataset.dealer || "",
+            city: row.dataset.city || "",
+            x: parseAxisValue(row.dataset.mileage),
+            y: parseAxisValue(row.dataset.price, { allowZero: false }),
+            lat: parseCoordinate(row.dataset.latitude, -90, 90),
+            lng: parseCoordinate(row.dataset.longitude, -180, 180),
+          }));
+
+          const rowById = new Map(
+            rowContexts.filter((item) => item.rowId).map((item) => [item.rowId, item])
+          );
+          const points = rowContexts.filter((item) => item.x !== null && item.y !== null);
+          const mappable = rowContexts.filter((item) => item.lat !== null && item.lng !== null);
 
           const width = Math.max(600, Math.floor(svg.clientWidth || 760));
           const height = Math.max(280, Math.floor(svg.clientHeight || 300));
           svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
           svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
-
           svg.innerHTML = "";
 
-          const rows = Array.from(document.querySelectorAll(rowSelector));
-          const points = rows
-            .map((row) => ({
-              row,
-              rowId: row.dataset.rowId || "",
-              x: Number(row.dataset.mileage),
-              y: Number(row.dataset.price),
-              trim: row.dataset.trim || "",
-            }))
-            .filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
+          const dotByRowId = new Map();
+          const markerByRowId = new Map();
+          let selectedRow = null;
+          let selectedDot = null;
+          let selectedMarker = null;
+          let map = null;
+
+          const setMarkerStyle = (marker, isSelected, trim) => {
+            if (!marker) return;
+            marker.setStyle({
+              radius: isSelected ? 9 : 6,
+              weight: isSelected ? 2.5 : 1.2,
+              color: isSelected ? "#0f172a" : "#334155",
+              fillColor: getTrimColor(trim, fallbackColor),
+              fillOpacity: isSelected ? 0.95 : 0.82,
+            });
+            if (isSelected && marker.bringToFront) marker.bringToFront();
+          };
+
+          const selectByRowId = (
+            rowId,
+            { scroll = true, openPopup = true, pan = true } = {}
+          ) => {
+            const context = rowById.get(rowId);
+            if (!context) return;
+
+            if (selectedRow) selectedRow.classList.remove("row-selected");
+            if (selectedDot) selectedDot.classList.remove("selected");
+            if (selectedMarker) setMarkerStyle(selectedMarker, false, selectedMarker._trimName);
+
+            selectedRow = context.row;
+            selectedDot = dotByRowId.get(rowId) || null;
+            selectedMarker = markerByRowId.get(rowId) || null;
+
+            if (selectedRow) {
+              selectedRow.classList.add("row-selected");
+              if (scroll) selectedRow.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+            if (selectedDot) selectedDot.classList.add("selected");
+            if (selectedMarker) {
+              setMarkerStyle(selectedMarker, true, selectedMarker._trimName);
+              if (map && pan) map.panTo(selectedMarker.getLatLng());
+              if (openPopup) selectedMarker.openPopup();
+            }
+          };
+
+          rowContexts.forEach((item) => {
+            if (!item.rowId) return;
+            item.row.addEventListener("click", () => selectByRowId(item.rowId));
+          });
 
           if (!points.length) {
             if (emptyEl) {
               emptyEl.textContent =
                 "No scatter points yet. Need both mileage and price values in table rows.";
             }
+          } else {
+            if (emptyEl) {
+              emptyEl.textContent = "Tip: click a dot to highlight row and dealer on map.";
+            }
+
+            const pad = { top: 18, right: 16, bottom: 44, left: 62 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+
+            let minX = Math.min(...points.map((p) => p.x));
+            let maxX = Math.max(...points.map((p) => p.x));
+            let minY = Math.min(...points.map((p) => p.y));
+            let maxY = Math.max(...points.map((p) => p.y));
+
+            if (minX === maxX) {
+              minX -= 1;
+              maxX += 1;
+            }
+            if (minY === maxY) {
+              minY -= 1;
+              maxY += 1;
+            }
+
+            const xPad = (maxX - minX) * 0.06;
+            const yPad = (maxY - minY) * 0.08;
+            minX = Math.max(0, minX - xPad);
+            maxX += xPad;
+            minY = Math.max(0, minY - yPad);
+            maxY += yPad;
+
+            const xScale = (x) => pad.left + ((x - minX) / (maxX - minX)) * plotW;
+            const yScale = (y) => pad.top + (1 - (y - minY) / (maxY - minY)) * plotH;
+
+            const grid = createSvgEl("g", { stroke: "#e5e7eb", "stroke-width": 1 });
+            const axes = createSvgEl("g", { stroke: "#64748b", "stroke-width": 1.25 });
+            const labels = createSvgEl("g", {
+              fill: "#475569",
+              "font-size": 11,
+              "font-family": "Segoe UI, sans-serif",
+            });
+            const dots = createSvgEl("g");
+
+            for (let i = 0; i <= 4; i += 1) {
+              const tx = i / 4;
+              const x = pad.left + tx * plotW;
+              const y = pad.top + tx * plotH;
+
+              grid.appendChild(
+                createSvgEl("line", { x1: x, y1: pad.top, x2: x, y2: pad.top + plotH })
+              );
+              grid.appendChild(
+                createSvgEl("line", { x1: pad.left, y1: y, x2: pad.left + plotW, y2: y })
+              );
+
+              const xVal = minX + tx * (maxX - minX);
+              const yVal = maxY - tx * (maxY - minY);
+
+              const xText = createSvgEl("text", {
+                x,
+                y: pad.top + plotH + 16,
+                "text-anchor": "middle",
+              });
+              xText.textContent = fmt(xVal);
+              labels.appendChild(xText);
+
+              const yText = createSvgEl("text", {
+                x: pad.left - 8,
+                y: y + 4,
+                "text-anchor": "end",
+              });
+              yText.textContent = fmt(yVal);
+              labels.appendChild(yText);
+            }
+
+            axes.appendChild(
+              createSvgEl("line", {
+                x1: pad.left,
+                y1: pad.top + plotH,
+                x2: pad.left + plotW,
+                y2: pad.top + plotH,
+              })
+            );
+            axes.appendChild(
+              createSvgEl("line", { x1: pad.left, y1: pad.top, x2: pad.left, y2: pad.top + plotH })
+            );
+
+            const xLabel = createSvgEl("text", {
+              x: pad.left + plotW / 2,
+              y: height - 10,
+              "text-anchor": "middle",
+              fill: "#0f172a",
+              "font-size": 12,
+            });
+            xLabel.textContent = "Mileage";
+
+            const yLabel = createSvgEl("text", {
+              x: 16,
+              y: pad.top + plotH / 2,
+              "text-anchor": "middle",
+              fill: "#0f172a",
+              "font-size": 12,
+              transform: `rotate(-90 16 ${pad.top + plotH / 2})`,
+            });
+            yLabel.textContent = "Price";
+
+            points.forEach((point) => {
+              const rowId = point.rowId;
+              if (!rowId) return;
+              const cx = xScale(point.x);
+              const cy = yScale(point.y);
+              const dot = createSvgEl("circle", {
+                cx,
+                cy,
+                r: 5,
+                fill: getTrimColor(point.trim, fallbackColor),
+                class: "dot-point",
+                "vector-effect": "non-scaling-stroke",
+              });
+              const tooltip = createSvgEl("title");
+              tooltip.textContent = `Trim: ${point.trim || "Unknown"} | Mileage: ${fmt(point.x)} | Price: ${fmt(point.y)}`;
+              dot.appendChild(tooltip);
+              dot.addEventListener("click", () => selectByRowId(rowId, { scroll: false }));
+              dots.appendChild(dot);
+              dotByRowId.set(rowId, dot);
+            });
+
+            svg.appendChild(grid);
+            svg.appendChild(axes);
+            svg.appendChild(labels);
+            svg.appendChild(dots);
+            svg.appendChild(xLabel);
+            svg.appendChild(yLabel);
+          }
+
+          if (!mapEl) return;
+          if (!window.L) {
+            if (mapEmptyEl) mapEmptyEl.textContent = "Map library failed to load.";
             return;
           }
-          if (emptyEl) {
-            emptyEl.textContent = "Tip: click a dot to highlight its table row.";
+
+          map = window.L.map(mapEl, { scrollWheelZoom: false });
+          window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: "&copy; OpenStreetMap contributors",
+          }).addTo(map);
+
+          if (!mappable.length) {
+            map.setView([42.3601, -71.0589], 7);
+            if (mapEmptyEl) mapEmptyEl.textContent = "No dealer coordinates in this result set yet.";
+            return;
           }
 
-          const pad = { top: 18, right: 16, bottom: 44, left: 62 };
-          const plotW = width - pad.left - pad.right;
-          const plotH = height - pad.top - pad.bottom;
-
-          let minX = Math.min(...points.map((p) => p.x));
-          let maxX = Math.max(...points.map((p) => p.x));
-          let minY = Math.min(...points.map((p) => p.y));
-          let maxY = Math.max(...points.map((p) => p.y));
-
-          if (minX === maxX) {
-            minX -= 1;
-            maxX += 1;
-          }
-          if (minY === maxY) {
-            minY -= 1;
-            maxY += 1;
-          }
-
-          const xPad = (maxX - minX) * 0.06;
-          const yPad = (maxY - minY) * 0.08;
-          minX -= xPad;
-          maxX += xPad;
-          minY -= yPad;
-          maxY += yPad;
-
-          const xScale = (x) => pad.left + ((x - minX) / (maxX - minX)) * plotW;
-          const yScale = (y) => pad.top + (1 - (y - minY) / (maxY - minY)) * plotH;
-
-          const grid = createSvgEl("g", { stroke: "#e5e7eb", "stroke-width": 1 });
-          const axes = createSvgEl("g", { stroke: "#64748b", "stroke-width": 1.25 });
-          const labels = createSvgEl("g", {
-            fill: "#475569",
-            "font-size": 11,
-            "font-family": "Segoe UI, sans-serif",
-          });
-          const dots = createSvgEl("g");
-
-          for (let i = 0; i <= 4; i += 1) {
-            const tx = i / 4;
-            const x = pad.left + tx * plotW;
-            const y = pad.top + tx * plotH;
-
-            grid.appendChild(
-              createSvgEl("line", { x1: x, y1: pad.top, x2: x, y2: pad.top + plotH })
+          const bounds = [];
+          mappable.forEach((item) => {
+            if (!item.rowId) return;
+            const marker = window.L.circleMarker([item.lat, item.lng], {});
+            marker._trimName = item.trim || "";
+            setMarkerStyle(marker, false, marker._trimName);
+            marker.bindPopup(
+              `<strong>${escapeHtml(item.dealer || "Dealer")}</strong><br/>${escapeHtml(item.city || "Unknown city")}`
             );
-            grid.appendChild(
-              createSvgEl("line", { x1: pad.left, y1: y, x2: pad.left + plotW, y2: y })
+            marker.addTo(map);
+            marker.on("click", () =>
+              selectByRowId(item.rowId, { scroll: true, openPopup: false, pan: false })
             );
-
-            const xVal = minX + tx * (maxX - minX);
-            const yVal = maxY - tx * (maxY - minY);
-
-            const xText = createSvgEl("text", { x, y: pad.top + plotH + 16, "text-anchor": "middle" });
-            xText.textContent = fmt(xVal);
-            labels.appendChild(xText);
-
-            const yText = createSvgEl("text", {
-              x: pad.left - 8,
-              y: y + 4,
-              "text-anchor": "end",
-            });
-            yText.textContent = fmt(yVal);
-            labels.appendChild(yText);
-          }
-
-          axes.appendChild(
-            createSvgEl("line", {
-              x1: pad.left,
-              y1: pad.top + plotH,
-              x2: pad.left + plotW,
-              y2: pad.top + plotH,
-            })
-          );
-          axes.appendChild(
-            createSvgEl("line", { x1: pad.left, y1: pad.top, x2: pad.left, y2: pad.top + plotH })
-          );
-
-          const xLabel = createSvgEl("text", {
-            x: pad.left + plotW / 2,
-            y: height - 10,
-            "text-anchor": "middle",
-            fill: "#0f172a",
-            "font-size": 12,
+            markerByRowId.set(item.rowId, marker);
+            bounds.push([item.lat, item.lng]);
           });
-          xLabel.textContent = "Mileage";
 
-          const yLabel = createSvgEl("text", {
-            x: 16,
-            y: pad.top + plotH / 2,
-            "text-anchor": "middle",
-            fill: "#0f172a",
-            "font-size": 12,
-            transform: `rotate(-90 16 ${pad.top + plotH / 2})`,
-          });
-          yLabel.textContent = "Price";
-
-          let selectedRow = null;
-          let selectedDot = null;
-
-          const selectPoint = (rowEl, dotEl) => {
-            if (selectedRow) selectedRow.classList.remove("row-selected");
-            if (selectedDot) selectedDot.classList.remove("selected");
-            selectedRow = rowEl;
-            selectedDot = dotEl;
-            if (selectedRow) selectedRow.classList.add("row-selected");
-            if (selectedDot) selectedDot.classList.add("selected");
-            if (selectedRow) {
-              selectedRow.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          if (bounds.length) {
+            map.fitBounds(bounds, { padding: [24, 24] });
+            if (mapEmptyEl) {
+              mapEmptyEl.textContent = "Tip: click a row or dot to focus the dealer marker.";
             }
-          };
-
-          points.forEach((point) => {
-            const cx = xScale(point.x);
-            const cy = yScale(point.y);
-            const dot = createSvgEl("circle", {
-              cx,
-              cy,
-              r: 5,
-              fill: getTrimColor(point.trim, fallbackColor),
-              class: "dot-point",
-              "vector-effect": "non-scaling-stroke",
-            });
-            const tooltip = createSvgEl("title");
-            tooltip.textContent = `Trim: ${point.trim || "Unknown"} | Mileage: ${fmt(point.x)} | Price: ${fmt(point.y)}`;
-            dot.appendChild(tooltip);
-
-            dot.addEventListener("click", () => selectPoint(point.row, dot));
-            point.row.addEventListener("click", () => selectPoint(point.row, dot));
-
-            dots.appendChild(dot);
-          });
-
-          svg.appendChild(grid);
-          svg.appendChild(axes);
-          svg.appendChild(labels);
-          svg.appendChild(dots);
-          svg.appendChild(xLabel);
-          svg.appendChild(yLabel);
+          } else {
+            map.setView([42.3601, -71.0589], 7);
+            if (mapEmptyEl) mapEmptyEl.textContent = "No dealer coordinates in this result set yet.";
+          }
         };
 
-        renderScatterChart({
+        applyColorSwatches();
+        renderPanel({
           svgId: "chart-model-y",
           emptyId: "chart-model-y-empty",
+          mapId: "map-model-y",
+          mapEmptyId: "map-model-y-empty",
           rowSelector: "tr.model-y-row",
           fallbackColor: "#0f766e",
         });
-        renderScatterChart({
+        renderPanel({
           svgId: "chart-model-3",
           emptyId: "chart-model-3-empty",
+          mapId: "map-model-3",
+          mapEmptyId: "map-model-3-empty",
           rowSelector: "tr.model-3-row",
           fallbackColor: "#2563eb",
         });

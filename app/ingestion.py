@@ -31,6 +31,26 @@ def _to_int(value: Any) -> int | None:
     return None
 
 
+def _to_bool(value: Any) -> bool | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        if value == 1:
+            return True
+        if value == 0:
+            return False
+        return None
+    if isinstance(value, str):
+        text = value.strip().lower()
+        if text in {"1", "true", "yes", "y"}:
+            return True
+        if text in {"0", "false", "no", "n"}:
+            return False
+    return None
+
+
 def _normalize_state(value: str | None) -> str | None:
     if not value:
         return None
@@ -390,6 +410,8 @@ class ListingFilters:
     trim: str | None = None
     year_min: int | None = None
     year_max: int | None = None
+    clean_title_values: tuple[str, ...] = ()
+    one_owner_values: tuple[str, ...] = ()
 
 
 def _apply_common_filters(stmt, filters: ListingFilters):
@@ -412,13 +434,85 @@ def _apply_common_filters(stmt, filters: ListingFilters):
     return stmt
 
 
+def _history_state(raw: dict[str, Any], candidate_keys: tuple[str, ...]) -> str:
+    value: Any = None
+    for key in candidate_keys:
+        if key in raw:
+            value = raw.get(key)
+            break
+
+    if value is None:
+        vehicle_history = raw.get("vehicle_history")
+        if isinstance(vehicle_history, dict):
+            for key in candidate_keys:
+                if key in vehicle_history:
+                    value = vehicle_history.get(key)
+                    break
+
+    bool_value = _to_bool(value)
+    if bool_value is True:
+        return "yes"
+    if bool_value is False:
+        return "no"
+    return "unknown"
+
+
+def _combined_history_states(*states: str) -> set[str]:
+    known = {state for state in states if state in {"yes", "no"}}
+    if known:
+        return known
+    return {"unknown"}
+
+
+def _matches_carfax_filters(row: Listing, filters: ListingFilters) -> bool:
+    raw = row.raw or {}
+    if not isinstance(raw, dict):
+        raw = {}
+
+    clean_title_state = _history_state(
+        raw,
+        ("carfax_clean_title", "carfax_clean_title_flag"),
+    )
+    one_owner_state = _history_state(
+        raw,
+        ("carfax_1_owner", "carfax_one_owner"),
+    )
+    autocheck_clean_title_state = _history_state(
+        raw,
+        ("autocheck_clean_title", "auto_check_clean_title", "autocheck_clean_title_flag"),
+    )
+    autocheck_one_owner_state = _history_state(
+        raw,
+        ("autocheck_1_owner", "auto_check_1_owner", "autocheck_one_owner"),
+    )
+
+    combined_clean_title_states = _combined_history_states(
+        clean_title_state, autocheck_clean_title_state
+    )
+    if filters.clean_title_values and not (
+        set(filters.clean_title_values) & combined_clean_title_states
+    ):
+        return False
+
+    combined_one_owner_states = _combined_history_states(
+        one_owner_state, autocheck_one_owner_state
+    )
+    if filters.one_owner_values and not (
+        set(filters.one_owner_values) & combined_one_owner_states
+    ):
+        return False
+
+    return True
+
+
 def query_model_y_hw4(session: Session, filters: ListingFilters) -> list[Listing]:
     stmt = select(Listing).where(
         Listing.source == "marketcheck", Listing.model == "Y", Listing.hw4_likely.is_(True)
     )
     stmt = _apply_common_filters(stmt, filters)
     stmt = stmt.order_by(Listing.last_seen.desc(), Listing.price.asc())
-    return list(session.execute(stmt).scalars().all())
+    rows = list(session.execute(stmt).scalars().all())
+    return [row for row in rows if _matches_carfax_filters(row, filters)]
 
 
 def query_model3_2024(session: Session, filters: ListingFilters) -> list[Listing]:
@@ -430,7 +524,8 @@ def query_model3_2024(session: Session, filters: ListingFilters) -> list[Listing
     )
     stmt = _apply_common_filters(stmt, filters)
     stmt = stmt.order_by(Listing.last_seen.desc(), Listing.price.asc())
-    return list(session.execute(stmt).scalars().all())
+    rows = list(session.execute(stmt).scalars().all())
+    return [row for row in rows if _matches_carfax_filters(row, filters)]
 
 
 def query_export_rows(session: Session, filters: ListingFilters) -> list[Listing]:
@@ -443,4 +538,42 @@ def query_export_rows(session: Session, filters: ListingFilters) -> list[Listing
     )
     stmt = _apply_common_filters(base, filters)
     stmt = stmt.order_by(Listing.model.asc(), Listing.price.asc())
-    return list(session.execute(stmt).scalars().all())
+    rows = list(session.execute(stmt).scalars().all())
+    return [row for row in rows if _matches_carfax_filters(row, filters)]
+
+
+def query_trim_options(session: Session, filters: ListingFilters) -> list[str]:
+    base = select(Listing).where(
+        Listing.source == "marketcheck",
+        Listing.trim.is_not(None),
+        or_(
+            and_(Listing.model == "Y", Listing.hw4_likely.is_(True)),
+            and_(Listing.model == "3", Listing.year.is_not(None), Listing.year >= 2024),
+        ),
+    )
+    filters_without_trim = ListingFilters(
+        state=filters.state,
+        min_price=filters.min_price,
+        max_price=filters.max_price,
+        min_miles=filters.min_miles,
+        max_miles=filters.max_miles,
+        trim=None,
+        year_min=filters.year_min,
+        year_max=filters.year_max,
+        clean_title_values=filters.clean_title_values,
+        one_owner_values=filters.one_owner_values,
+    )
+    stmt = _apply_common_filters(base, filters_without_trim)
+    stmt = stmt.order_by(Listing.trim.asc(), Listing.last_seen.desc())
+
+    seen: set[str] = set()
+    trims: list[str] = []
+    for row in session.execute(stmt).scalars().all():
+        if not _matches_carfax_filters(row, filters_without_trim):
+            continue
+        text = str(row.trim or "").strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        trims.append(text)
+    return trims
