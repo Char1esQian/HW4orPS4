@@ -273,6 +273,58 @@
         margin-top: 8px;
         font-size: 12px;
       }
+      .trend-disclosure {
+        border-bottom: 1px solid var(--line);
+        background: #fff;
+      }
+      .trend-disclosure > summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 10px 14px;
+        font-size: 13px;
+        color: #0f172a;
+        user-select: none;
+      }
+      .trend-disclosure > summary::-webkit-details-marker {
+        display: none;
+      }
+      .trend-disclosure > summary::before {
+        content: "+";
+        display: inline-block;
+        margin-right: 8px;
+        color: #475569;
+      }
+      .trend-disclosure[open] > summary::before {
+        content: "-";
+      }
+      .trend-note {
+        padding: 0 14px 10px 14px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .trend-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        padding: 0 14px 14px 14px;
+      }
+      .trend-card {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #ffffff;
+        padding: 10px;
+      }
+      .trend-chart {
+        width: 100%;
+        height: 260px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+      }
+      .trend-empty {
+        margin-top: 6px;
+        font-size: 12px;
+      }
       .dealer-map {
         width: 100%;
         height: 300px;
@@ -334,6 +386,15 @@
         color: #475569;
         border-color: #cbd5e1;
       }
+      .fsd-cell {
+        width: 44px;
+        text-align: center;
+      }
+      .fsd-star {
+        color: #ca8a04;
+        font-size: 15px;
+        line-height: 1;
+      }
       tr.row-selected td {
         background: #e0f2fe;
       }
@@ -345,6 +406,9 @@
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
         .viz-grid {
+          grid-template-columns: 1fr;
+        }
+        .trend-grid {
           grid-template-columns: 1fr;
         }
         .chart-box {
@@ -377,6 +441,9 @@
           <form id="refresh-form" method="post" action="{{ refresh_action }}">
             <button id="refresh-btn" class="btn" type="submit">Refresh Listings</button>
           </form>
+          <form id="scan-fsd-form" method="post" action="{{ scan_fsd_action }}">
+            <button id="scan-fsd-btn" class="btn btn-secondary" type="submit">Scan FSD</button>
+          </form>
           <a class="btn btn-secondary" href="{{ export_csv_url }}">Export CSV</a>
           <a class="btn btn-secondary" href="{{ export_json_url }}">Export JSON</a>
         </div>
@@ -384,6 +451,8 @@
         <div class="helper">
           `Refresh Listings` pulls fresh data from MarketCheck and upserts it into SQLite.
           `Apply Filters` only filters the listings already stored locally (it does not call MarketCheck).
+          `Scan FSD` scans listing pages for FSD mentions only for the current filtered results.
+          Applying filters records one availability snapshot per day for the current filter condition.
         </div>
 
         <form id="filter-form" class="filters" method="get" action="/">
@@ -391,7 +460,7 @@
           <label>Min Price <input type="number" name="min_price" value="{{ filters.min_price or '' }}" /></label>
           <label>Max Price <input type="number" name="max_price" value="{{ filters.max_price or '' }}" /></label>
           <label>Min Miles <input type="number" name="min_miles" value="{{ filters.min_miles or '' }}" /></label>
-          <label>Max Miles <input type="number" name="max_miles" value="{{ filters.max_miles or '' }}" /></label>
+          <label>Max Miles <input type="number" name="max_miles" value="{{ filters.max_miles if filters.max_miles is not none else default_max_miles }}" /></label>
           <label>
             Trim
             <select name="trim">
@@ -469,7 +538,7 @@
               </label>
             </div>
           </div>
-          <button id="apply-btn" class="btn apply" type="submit">Apply Filters</button>
+          <button id="apply-btn" class="btn apply" type="submit">Apply & Track</button>
         </form>
 
         <div
@@ -494,6 +563,15 @@
           {% else %}
           No refresh run yet. Click <strong>Refresh Listings</strong> to fetch data from MarketCheck.
           {% endif %}
+          {% if fsd_scan_status %}
+          <br />
+          FSD scan: <strong>{{ fsd_scan_status }}</strong> | scanned: {{ fsd_scanned or 0 }} | new stars:
+          {{ fsd_new or 0 }}
+          {% if fsd_scan_error %}
+          <br />
+          FSD scan error: {{ fsd_scan_error }}
+          {% endif %}
+          {% endif %}
         </div>
       </section>
 
@@ -502,6 +580,25 @@
           <h2>Model Y (HW4 likely) in {{ filters.state }}</h2>
           <span class="pill">{{ model_y_results|length }} matches</span>
         </div>
+        <details class="trend-disclosure">
+          <summary>Availability Trend</summary>
+          <div class="trend-note">
+            Condition: <code>{{ history_filter_description }}</code> | points:
+            <strong>{{ history_model_y|length }}</strong>
+          </div>
+          <div class="trend-grid">
+            <div class="trend-card">
+              <div class="chart-title">Model Y Count by Day</div>
+              <svg id="trend-y-count" class="trend-chart"></svg>
+              <div id="trend-y-count-empty" class="trend-empty muted"></div>
+            </div>
+            <div class="trend-card">
+              <div class="chart-title">Model Y Price: Lowest / Q1 / Median / Q3</div>
+              <svg id="trend-y-price" class="trend-chart"></svg>
+              <div id="trend-y-price-empty" class="trend-empty muted"></div>
+            </div>
+          </div>
+        </details>
         <div class="viz-grid">
           <div class="chart-box">
             <div class="chart-title">Model Y Scatter: Mileage (X) vs Price (Y)</div>
@@ -519,6 +616,7 @@
             <thead>
               <tr>
                 <th>Year</th>
+                <th>FSD</th>
                 <th>Trim</th>
                 <th>Price</th>
                 <th>Mileage</th>
@@ -554,7 +652,16 @@
                 {% set int_color = row.raw.get('interior_color') or row.raw.get('base_int_color') %}
                 {% set clean_title = row.raw.get('carfax_clean_title') %}
                 {% set one_owner = row.raw.get('carfax_1_owner') %}
+                {% set fsd_mentioned = row.raw.get('_fsd_mentioned') %}
+                {% set fsd_source = row.raw.get('_fsd_source') %}
                 <td>{{ row.year or '' }}</td>
+                <td class="fsd-cell">
+                  {% if fsd_mentioned %}
+                  <span class="fsd-star" title="FSD mention detected from {{ 'listing page' if fsd_source == 'page' else 'API data' }}">&#9733;</span>
+                  {% else %}
+                  <span class="muted">-</span>
+                  {% endif %}
+                </td>
                 <td>{{ row.trim or '' }}</td>
                 <td>{{ row.price or '' }}</td>
                 <td>{{ row.mileage or '' }}</td>
@@ -582,7 +689,7 @@
                 <td>{% if row.url %}<a href="{{ row.url }}" target="_blank">Open</a>{% endif %}</td>
               </tr>
               {% else %}
-              <tr><td class="muted" colspan="12">No results.</td></tr>
+              <tr><td class="muted" colspan="13">No results.</td></tr>
               {% endfor %}
             </tbody>
           </table>
@@ -594,6 +701,25 @@
           <h2>Model 3 (2024+) in {{ filters.state }}</h2>
           <span class="pill">{{ model_3_results|length }} matches</span>
         </div>
+        <details class="trend-disclosure">
+          <summary>Availability Trend</summary>
+          <div class="trend-note">
+            Condition: <code>{{ history_filter_description }}</code> | points:
+            <strong>{{ history_model_3|length }}</strong>
+          </div>
+          <div class="trend-grid">
+            <div class="trend-card">
+              <div class="chart-title">Model 3 Count by Day</div>
+              <svg id="trend-3-count" class="trend-chart"></svg>
+              <div id="trend-3-count-empty" class="trend-empty muted"></div>
+            </div>
+            <div class="trend-card">
+              <div class="chart-title">Model 3 Price: Lowest / Q1 / Median / Q3</div>
+              <svg id="trend-3-price" class="trend-chart"></svg>
+              <div id="trend-3-price-empty" class="trend-empty muted"></div>
+            </div>
+          </div>
+        </details>
         <div class="viz-grid">
           <div class="chart-box">
             <div class="chart-title">Model 3 Scatter: Mileage (X) vs Price (Y)</div>
@@ -611,6 +737,7 @@
             <thead>
               <tr>
                 <th>Year</th>
+                <th>FSD</th>
                 <th>Trim</th>
                 <th>Price</th>
                 <th>Mileage</th>
@@ -645,7 +772,16 @@
                 {% set int_color = row.raw.get('interior_color') or row.raw.get('base_int_color') %}
                 {% set clean_title = row.raw.get('carfax_clean_title') %}
                 {% set one_owner = row.raw.get('carfax_1_owner') %}
+                {% set fsd_mentioned = row.raw.get('_fsd_mentioned') %}
+                {% set fsd_source = row.raw.get('_fsd_source') %}
                 <td>{{ row.year or '' }}</td>
+                <td class="fsd-cell">
+                  {% if fsd_mentioned %}
+                  <span class="fsd-star" title="FSD mention detected from {{ 'listing page' if fsd_source == 'page' else 'API data' }}">&#9733;</span>
+                  {% else %}
+                  <span class="muted">-</span>
+                  {% endif %}
+                </td>
                 <td>{{ row.trim or '' }}</td>
                 <td>{{ row.price or '' }}</td>
                 <td>{{ row.mileage or '' }}</td>
@@ -672,13 +808,19 @@
                 <td>{% if row.url %}<a href="{{ row.url }}" target="_blank">Open</a>{% endif %}</td>
               </tr>
               {% else %}
-              <tr><td class="muted" colspan="11">No results.</td></tr>
+              <tr><td class="muted" colspan="12">No results.</td></tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
       </section>
     </main>
+    <script id="history-model-y-data" type="application/json">
+      {{ history_model_y|tojson }}
+    </script>
+    <script id="history-model-3-data" type="application/json">
+      {{ history_model_3|tojson }}
+    </script>
     <script
       src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
@@ -689,6 +831,8 @@
         const progressBox = document.getElementById("progress-box");
         const refreshForm = document.getElementById("refresh-form");
         const refreshBtn = document.getElementById("refresh-btn");
+        const scanFsdForm = document.getElementById("scan-fsd-form");
+        const scanFsdBtn = document.getElementById("scan-fsd-btn");
         const filterForm = document.getElementById("filter-form");
         const applyBtn = document.getElementById("apply-btn");
         const svgNs = "http://www.w3.org/2000/svg";
@@ -720,7 +864,20 @@
               applyBtn.textContent = "Applying...";
             }
             setProgress(
-              "Applying filters to local database results (no API call).",
+              "Applying filters and recording today's availability snapshot (one point/day).",
+              "working"
+            );
+          });
+        }
+
+        if (scanFsdForm) {
+          scanFsdForm.addEventListener("submit", () => {
+            if (scanFsdBtn) {
+              scanFsdBtn.disabled = true;
+              scanFsdBtn.textContent = "Scanning...";
+            }
+            setProgress(
+              "FSD scan started. Checking listing pages for FSD mentions in current filtered results...",
               "working"
             );
           });
@@ -730,6 +887,22 @@
           if (!Number.isFinite(value)) return "";
           return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(value);
         };
+        const fmtShortDate = new Intl.DateTimeFormat("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        const readHistoryRows = (scriptId) => {
+          const el = document.getElementById(scriptId);
+          if (!el?.textContent) return [];
+          try {
+            const parsed = JSON.parse(el.textContent);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch (err) {
+            return [];
+          }
+        };
+        const historyModelY = readHistoryRows("history-model-y-data");
+        const historyModel3 = readHistoryRows("history-model-3-data");
 
         const escapeHtml = (value) =>
           String(value ?? "")
@@ -799,6 +972,188 @@
           if (text.includes("long range") || text.includes("premium")) return "#16a34a";
           if (text.includes("base") || text.includes("standard")) return "#ca8a04";
           return fallback;
+        };
+
+        const renderHistoryTrend = ({
+          svgId,
+          emptyId,
+          rows,
+          seriesDefs,
+          formatValue = fmt,
+          zeroBaseline = true,
+          emptyText = "No history points yet for this filter.",
+        }) => {
+          const svg = document.getElementById(svgId);
+          const emptyEl = document.getElementById(emptyId);
+          if (!svg) return;
+
+          const timeline = rows
+            .map((row) => {
+              const rawDate = String(row?.date || "").trim();
+              const t = Date.parse(`${rawDate}T00:00:00Z`);
+              return { t, rawDate, row };
+            })
+            .filter((p) => Number.isFinite(p.t))
+            .sort((a, b) => a.t - b.t);
+
+          const series = seriesDefs.map((def) => ({
+            ...def,
+            points: timeline
+              .map((item) => {
+                const y = Number(item.row?.[def.key]);
+                return { t: item.t, rawDate: item.rawDate, y };
+              })
+              .filter((p) => Number.isFinite(p.y) && p.y >= 0),
+          }));
+          const allPoints = series.flatMap((s) => s.points);
+
+          const width = Math.max(520, Math.floor(svg.clientWidth || 700));
+          const height = Math.max(240, Math.floor(svg.clientHeight || 260));
+          svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+          svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+          svg.innerHTML = "";
+
+          if (!allPoints.length) {
+            if (emptyEl) emptyEl.textContent = emptyText;
+            return;
+          }
+          if (emptyEl) emptyEl.textContent = "One snapshot per day for this exact filter.";
+
+          const pad = { top: 38, right: 14, bottom: 44, left: 58 };
+          const plotW = width - pad.left - pad.right;
+          const plotH = height - pad.top - pad.bottom;
+          const dayMs = 24 * 60 * 60 * 1000;
+
+          let minT = Math.min(...allPoints.map((p) => p.t));
+          let maxT = Math.max(...allPoints.map((p) => p.t));
+          if (minT === maxT) {
+            minT -= dayMs;
+            maxT += dayMs;
+          }
+
+          let minY = Math.min(...allPoints.map((p) => p.y));
+          let maxY = Math.max(...allPoints.map((p) => p.y));
+          if (zeroBaseline) minY = 0;
+          if (maxY <= minY) maxY = minY + 1;
+
+          const spread = maxY - minY;
+          const yPad = Math.max(1, Math.ceil(spread * 0.12));
+          if (!zeroBaseline) minY = Math.max(0, minY - yPad);
+          maxY += yPad;
+
+          const xScale = (t) => pad.left + ((t - minT) / (maxT - minT)) * plotW;
+          const yScale = (y) => pad.top + (1 - (y - minY) / (maxY - minY)) * plotH;
+
+          const grid = createSvgEl("g", { stroke: "#e2e8f0", "stroke-width": 1 });
+          const axes = createSvgEl("g", { stroke: "#64748b", "stroke-width": 1.25 });
+          const labels = createSvgEl("g", {
+            fill: "#475569",
+            "font-size": 11,
+            "font-family": "Segoe UI, sans-serif",
+          });
+          const legend = createSvgEl("g", {
+            fill: "#334155",
+            "font-size": 11,
+            "font-family": "Segoe UI, sans-serif",
+          });
+          const lines = createSvgEl("g");
+          const dots = createSvgEl("g");
+
+          for (let i = 0; i <= 4; i += 1) {
+            const ratio = i / 4;
+            const x = pad.left + ratio * plotW;
+            const y = pad.top + ratio * plotH;
+            const tickT = minT + ratio * (maxT - minT);
+            const tickY = maxY - ratio * (maxY - minY);
+
+            grid.appendChild(
+              createSvgEl("line", { x1: x, y1: pad.top, x2: x, y2: pad.top + plotH })
+            );
+            grid.appendChild(
+              createSvgEl("line", { x1: pad.left, y1: y, x2: pad.left + plotW, y2: y })
+            );
+
+            const xLabel = createSvgEl("text", {
+              x,
+              y: pad.top + plotH + 16,
+              "text-anchor": "middle",
+            });
+            xLabel.textContent = fmtShortDate.format(new Date(tickT));
+            labels.appendChild(xLabel);
+
+            const yLabel = createSvgEl("text", {
+              x: pad.left - 8,
+              y: y + 4,
+              "text-anchor": "end",
+            });
+            yLabel.textContent = formatValue(tickY);
+            labels.appendChild(yLabel);
+          }
+
+          series.forEach((def, idx) => {
+            if (!def.points.length) return;
+
+            const line = createSvgEl("polyline", {
+              fill: "none",
+              stroke: def.color,
+              "stroke-width": 2.2,
+              "stroke-linejoin": "round",
+              "stroke-linecap": "round",
+            });
+            const linePoints = def.points.map((p) => `${xScale(p.t)},${yScale(p.y)}`).join(" ");
+            line.setAttribute("points", linePoints);
+            lines.appendChild(line);
+
+            def.points.forEach((p) => {
+              const dot = createSvgEl("circle", {
+                cx: xScale(p.t),
+                cy: yScale(p.y),
+                r: 3.6,
+                fill: def.color,
+                stroke: "#ffffff",
+                "stroke-width": 1.2,
+              });
+              const tip = createSvgEl("title");
+              tip.textContent = `${p.rawDate}: ${def.label} ${formatValue(p.y)}`;
+              dot.appendChild(tip);
+              dots.appendChild(dot);
+            });
+
+            const legendX = pad.left + 4 + idx * 120;
+            const legendY = 18;
+            legend.appendChild(
+              createSvgEl("line", {
+                x1: legendX,
+                y1: legendY,
+                x2: legendX + 16,
+                y2: legendY,
+                stroke: def.color,
+                "stroke-width": 2.5,
+              })
+            );
+            const legendLabel = createSvgEl("text", { x: legendX + 20, y: legendY + 4 });
+            legendLabel.textContent = def.label;
+            legend.appendChild(legendLabel);
+          });
+
+          axes.appendChild(
+            createSvgEl("line", {
+              x1: pad.left,
+              y1: pad.top + plotH,
+              x2: pad.left + plotW,
+              y2: pad.top + plotH,
+            })
+          );
+          axes.appendChild(
+            createSvgEl("line", { x1: pad.left, y1: pad.top, x2: pad.left, y2: pad.top + plotH })
+          );
+
+          svg.appendChild(grid);
+          svg.appendChild(axes);
+          svg.appendChild(labels);
+          svg.appendChild(legend);
+          svg.appendChild(lines);
+          svg.appendChild(dots);
         };
 
         const renderPanel = ({
@@ -1076,6 +1431,48 @@
           }
         };
 
+        renderHistoryTrend({
+          svgId: "trend-y-count",
+          emptyId: "trend-y-count-empty",
+          rows: historyModelY,
+          seriesDefs: [{ key: "model_y_count", label: "Listings", color: "#0f766e" }],
+          zeroBaseline: true,
+        });
+        renderHistoryTrend({
+          svgId: "trend-y-price",
+          emptyId: "trend-y-price-empty",
+          rows: historyModelY,
+          seriesDefs: [
+            { key: "price_lowest", label: "Lowest", color: "#b45309" },
+            { key: "price_q1", label: "Q1", color: "#0f766e" },
+            { key: "price_median", label: "Median", color: "#2563eb" },
+            { key: "price_q3", label: "Q3", color: "#334155" },
+          ],
+          formatValue: (value) => `$${fmt(value)}`,
+          zeroBaseline: false,
+          emptyText: "No valid price points yet for this filter.",
+        });
+        renderHistoryTrend({
+          svgId: "trend-3-count",
+          emptyId: "trend-3-count-empty",
+          rows: historyModel3,
+          seriesDefs: [{ key: "model_3_count", label: "Listings", color: "#2563eb" }],
+          zeroBaseline: true,
+        });
+        renderHistoryTrend({
+          svgId: "trend-3-price",
+          emptyId: "trend-3-price-empty",
+          rows: historyModel3,
+          seriesDefs: [
+            { key: "price_lowest", label: "Lowest", color: "#b45309" },
+            { key: "price_q1", label: "Q1", color: "#0f766e" },
+            { key: "price_median", label: "Median", color: "#2563eb" },
+            { key: "price_q3", label: "Q3", color: "#334155" },
+          ],
+          formatValue: (value) => `$${fmt(value)}`,
+          zeroBaseline: false,
+          emptyText: "No valid price points yet for this filter.",
+        });
         applyColorSwatches();
         renderPanel({
           svgId: "chart-model-y",

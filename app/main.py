@@ -14,16 +14,21 @@ from app.config import get_settings
 from app.database import get_db, init_db
 from app.ingestion import (
     ListingFilters,
+    describe_filter_conditions,
     query_export_rows,
+    query_filter_snapshot_history,
     query_model3_2024,
     query_model_y_hw4,
     query_trim_options,
     refresh_marketcheck,
+    scan_fsd_mentions,
+    track_filter_snapshot,
 )
 from app.models import Listing, RunLog
 
 app = FastAPI(title="HW4 Finder", version="0.1.0")
 templates = Jinja2Templates(directory="app/templates")
+DEFAULT_MAX_MILES = 40000
 
 
 @app.on_event("startup")
@@ -68,6 +73,13 @@ def _parse_optional_int(value: str | None) -> int | None:
         return int(text)
     except ValueError:
         return None
+
+
+def _parse_max_miles(value: str | None) -> int:
+    parsed = _parse_optional_int(value)
+    if parsed is None:
+        return DEFAULT_MAX_MILES
+    return max(0, parsed)
 
 
 def _parse_carfax_values(values: list[str] | None) -> tuple[str, ...]:
@@ -145,6 +157,10 @@ def index(
     found: int | None = Query(None),
     upserted: int | None = Query(None),
     error: str | None = Query(None),
+    fsd_scan_status: str | None = Query(None),
+    fsd_scanned: int | None = Query(None),
+    fsd_new: int | None = Query(None),
+    fsd_scan_error: str | None = Query(None),
     db: Session = Depends(get_db),
 ):
     settings = get_settings()
@@ -154,7 +170,7 @@ def index(
         min_price=_parse_optional_int(min_price),
         max_price=_parse_optional_int(max_price),
         min_miles=_parse_optional_int(min_miles),
-        max_miles=_parse_optional_int(max_miles),
+        max_miles=_parse_max_miles(max_miles),
         trim=trim,
         year_min=_parse_optional_int(year_min),
         year_max=_parse_optional_int(year_max),
@@ -167,6 +183,30 @@ def index(
     )
     model_y = query_model_y_hw4(db, filters)
     model_3 = query_model3_2024(db, filters)
+    track_filter_snapshot(db, filters, model_y_rows=model_y, model_3_rows=model_3)
+    history_rows = query_filter_snapshot_history(db, filters)
+    history_model_y = [
+        {
+            "date": row.snapshot_date.isoformat(),
+            "model_y_count": row.model_y_count,
+            "price_lowest": row.model_y_price_lowest,
+            "price_q1": row.model_y_price_q1,
+            "price_median": row.model_y_price_median,
+            "price_q3": row.model_y_price_q3,
+        }
+        for row in history_rows
+    ]
+    history_model_3 = [
+        {
+            "date": row.snapshot_date.isoformat(),
+            "model_3_count": row.model_3_count,
+            "price_lowest": row.model_3_price_lowest,
+            "price_q1": row.model_3_price_q1,
+            "price_median": row.model_3_price_median,
+            "price_q3": row.model_3_price_q3,
+        }
+        for row in history_rows
+    ]
     trim_options = query_trim_options(db, filters)
     latest_run = db.execute(
         select(RunLog).order_by(RunLog.started_at.desc()).limit(1)
@@ -175,7 +215,17 @@ def index(
     query_pairs = [
         (key, value)
         for key, value in request.query_params.multi_items()
-        if key not in {"run_status", "found", "upserted", "error"}
+        if key
+        not in {
+            "run_status",
+            "found",
+            "upserted",
+            "error",
+            "fsd_scan_status",
+            "fsd_scanned",
+            "fsd_new",
+            "fsd_scan_error",
+        }
     ]
     qs = urlencode(query_pairs, doseq=True)
     suffix = f"?{qs}" if qs else ""
@@ -188,13 +238,22 @@ def index(
             "model_y_results": model_y,
             "model_3_results": model_3,
             "trim_options": trim_options,
+            "history_model_y": history_model_y,
+            "history_model_3": history_model_3,
+            "history_filter_description": describe_filter_conditions(filters),
+            "default_max_miles": DEFAULT_MAX_MILES,
             "refresh_action": f"/refresh{suffix}",
+            "scan_fsd_action": f"/scan-fsd{suffix}",
             "export_csv_url": f"/export.csv{suffix}",
             "export_json_url": f"/export.json{suffix}",
             "run_status": run_status,
             "found": found,
             "upserted": upserted,
             "error": error,
+            "fsd_scan_status": fsd_scan_status,
+            "fsd_scanned": fsd_scanned,
+            "fsd_new": fsd_new,
+            "fsd_scan_error": fsd_scan_error,
             "latest_run": latest_run,
         },
     )
@@ -215,6 +274,67 @@ def refresh(
     query_pairs.append(("upserted", str(run.items_upserted)))
     if run.error_text:
         query_pairs.append(("error", run.error_text))
+    redirect_to = "/"
+    if query_pairs:
+        redirect_to = f"/?{urlencode(query_pairs, doseq=True)}"
+    return RedirectResponse(url=redirect_to, status_code=303)
+
+
+@app.post("/scan-fsd")
+def scan_fsd(
+    request: Request,
+    state: str | None = Query(None),
+    min_price: str | None = Query(None),
+    max_price: str | None = Query(None),
+    min_miles: str | None = Query(None),
+    max_miles: str | None = Query(None),
+    trim: str | None = Query(None),
+    year_min: str | None = Query(None),
+    year_max: str | None = Query(None),
+    clean_title: list[str] | None = Query(None),
+    one_owner: list[str] | None = Query(None),
+    carfax_clean_title: list[str] | None = Query(None),
+    carfax_1_owner: list[str] | None = Query(None),
+    autocheck_clean_title: list[str] | None = Query(None),
+    autocheck_1_owner: list[str] | None = Query(None),
+    db: Session = Depends(get_db),
+):
+    settings = get_settings()
+    filters = _build_filters(
+        settings.default_state,
+        state=state,
+        min_price=_parse_optional_int(min_price),
+        max_price=_parse_optional_int(max_price),
+        min_miles=_parse_optional_int(min_miles),
+        max_miles=_parse_max_miles(max_miles),
+        trim=trim,
+        year_min=_parse_optional_int(year_min),
+        year_max=_parse_optional_int(year_max),
+        clean_title_values=_merge_history_values(
+            clean_title, carfax_clean_title, autocheck_clean_title
+        ),
+        one_owner_values=_merge_history_values(
+            one_owner, carfax_1_owner, autocheck_1_owner
+        ),
+    )
+
+    query_pairs = [
+        (key, value)
+        for key, value in request.query_params.multi_items()
+        if key not in {"fsd_scan_status", "fsd_scanned", "fsd_new", "fsd_scan_error"}
+    ]
+
+    try:
+        scanned, newly_found = scan_fsd_mentions(db, filters)
+        query_pairs.append(("fsd_scan_status", "success"))
+        query_pairs.append(("fsd_scanned", str(scanned)))
+        query_pairs.append(("fsd_new", str(newly_found)))
+    except Exception as exc:  # noqa: BLE001
+        query_pairs.append(("fsd_scan_status", "failed"))
+        query_pairs.append(("fsd_scanned", "0"))
+        query_pairs.append(("fsd_new", "0"))
+        query_pairs.append(("fsd_scan_error", str(exc)))
+
     redirect_to = "/"
     if query_pairs:
         redirect_to = f"/?{urlencode(query_pairs, doseq=True)}"
@@ -246,7 +366,7 @@ def export_json(
         min_price=_parse_optional_int(min_price),
         max_price=_parse_optional_int(max_price),
         min_miles=_parse_optional_int(min_miles),
-        max_miles=_parse_optional_int(max_miles),
+        max_miles=_parse_max_miles(max_miles),
         trim=trim,
         year_min=_parse_optional_int(year_min),
         year_max=_parse_optional_int(year_max),
@@ -286,7 +406,7 @@ def export_csv(
         min_price=_parse_optional_int(min_price),
         max_price=_parse_optional_int(max_price),
         min_miles=_parse_optional_int(min_miles),
-        max_miles=_parse_optional_int(max_miles),
+        max_miles=_parse_max_miles(max_miles),
         trim=trim,
         year_min=_parse_optional_int(year_min),
         year_max=_parse_optional_int(year_max),

@@ -1,18 +1,24 @@
 from __future__ import annotations
 
+import concurrent.futures
 import hashlib
+import json
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 from urllib.parse import urlparse
 
+import requests
 from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.hw4 import is_hw4_likely_model_y, normalize_vin
 from app.marketcheck import MarketCheckClient
-from app.models import Listing, RunLog, utcnow
+from app.models import FilterSnapshot, Listing, RunLog, utcnow
+
+FSD_PATTERN = re.compile(r"\bfsd\b|full[\s-]*self[\s-]*driving", re.IGNORECASE)
 
 
 def _to_int(value: Any) -> int | None:
@@ -78,6 +84,82 @@ def build_fingerprint(
 ) -> str:
     key = f"{source}|{(heading or '').strip().lower()}|{price or ''}|{(city or '').strip().lower()}"
     return hashlib.sha256(key.encode("utf-8")).hexdigest()
+
+
+def _iter_text_values(value: Any):
+    if value is None:
+        return
+    if isinstance(value, str):
+        yield value
+        return
+    if isinstance(value, dict):
+        for child in value.values():
+            yield from _iter_text_values(child)
+        return
+    if isinstance(value, (list, tuple, set)):
+        for child in value:
+            yield from _iter_text_values(child)
+
+
+def _text_mentions_fsd(text: str) -> bool:
+    lowered = text.lower()
+    if "not fsd" in lowered or "no fsd" in lowered:
+        return False
+    return bool(FSD_PATTERN.search(text))
+
+
+def _payload_mentions_fsd(item: dict[str, Any]) -> bool:
+    for text in _iter_text_values(item):
+        if _text_mentions_fsd(text):
+            return True
+    return False
+
+
+def _page_mentions_fsd(url: str, timeout_seconds: int) -> bool:
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/124.0.0.0 Safari/537.36"
+        )
+    }
+    response = requests.get(url, headers=headers, timeout=max(2, timeout_seconds))
+    response.raise_for_status()
+    return _text_mentions_fsd(response.text)
+
+
+def _enrich_fsd_from_pages(
+    adapted_listings: list[dict[str, Any]],
+    timeout_seconds: int,
+    workers: int,
+) -> None:
+    jobs: dict[concurrent.futures.Future[bool], dict[str, Any]] = {}
+    max_workers = max(1, workers)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for payload in adapted_listings:
+            raw = payload.get("raw")
+            if not isinstance(raw, dict):
+                continue
+            if bool(raw.get("_fsd_mentioned")):
+                continue
+            url = payload.get("url")
+            if not isinstance(url, str) or not url.strip():
+                continue
+            future = executor.submit(_page_mentions_fsd, url.strip(), timeout_seconds)
+            jobs[future] = payload
+
+        for future, payload in jobs.items():
+            raw = payload.get("raw")
+            if not isinstance(raw, dict):
+                continue
+            try:
+                mentioned = future.result()
+            except Exception:
+                mentioned = False
+
+            if mentioned:
+                raw["_fsd_mentioned"] = True
+                raw["_fsd_source"] = "page"
 
 
 def _pick(item: dict[str, Any], *keys: str) -> Any:
@@ -185,6 +267,10 @@ def adapt_marketcheck_item(item: dict[str, Any]) -> dict[str, Any]:
         _pick(item, "photo_links", "photos", "image_urls")
         or _pick_nested(item, ("media", "photo_links"))
     )
+    fsd_from_api = _payload_mentions_fsd(item)
+    raw_payload = dict(item)
+    raw_payload["_fsd_mentioned"] = fsd_from_api
+    raw_payload["_fsd_source"] = "api" if fsd_from_api else "none"
 
     hw4_likely = False
     hw4_reason = "HW4 heuristic applies only to Model Y."
@@ -207,7 +293,7 @@ def adapt_marketcheck_item(item: dict[str, Any]) -> dict[str, Any]:
         "hw4_reason": hw4_reason,
         "heading": str(heading) if heading else None,
         "photos": photos,
-        "raw": item,
+        "raw": raw_payload,
     }
 
 
@@ -385,6 +471,12 @@ def refresh_marketcheck(
             extra_filters=extra_filters,
         )
         adapted = [adapt_marketcheck_item(item) for item in listings]
+        if settings.fsd_page_scan_enabled:
+            _enrich_fsd_from_pages(
+                adapted,
+                timeout_seconds=settings.fsd_page_scan_timeout_seconds,
+                workers=settings.fsd_page_scan_workers,
+            )
         upserted = upsert_listings(session, adapted)
         run.status = "success"
         run.items_found = len(listings)
@@ -398,6 +490,204 @@ def refresh_marketcheck(
         session.add(run)
         session.commit()
     return run
+
+
+def scan_fsd_mentions(session: Session, filters: "ListingFilters") -> tuple[int, int]:
+    settings = get_settings()
+    rows = query_export_rows(session, filters)
+
+    candidates: list[Listing] = []
+    for row in rows:
+        if not row.url:
+            continue
+        raw = row.raw if isinstance(row.raw, dict) else {}
+        if bool(raw.get("_fsd_mentioned")):
+            continue
+        candidates.append(row)
+
+    if not candidates:
+        return 0, 0
+
+    scanned = 0
+    newly_marked = 0
+    updates: dict[str, dict[str, Any]] = {}
+    max_workers = max(1, settings.fsd_page_scan_workers)
+    timeout_seconds = max(2, settings.fsd_page_scan_timeout_seconds)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        jobs: dict[concurrent.futures.Future[bool], Listing] = {}
+        for row in candidates:
+            if not row.url:
+                continue
+            jobs[executor.submit(_page_mentions_fsd, row.url, timeout_seconds)] = row
+
+        for future, row in jobs.items():
+            scanned += 1
+            try:
+                mentioned = future.result()
+            except Exception:
+                mentioned = False
+
+            raw = dict(row.raw) if isinstance(row.raw, dict) else {}
+            if mentioned:
+                raw["_fsd_mentioned"] = True
+                raw["_fsd_source"] = "page"
+                updates[row.id] = raw
+                newly_marked += 1
+
+    if updates:
+        for row in rows:
+            raw = updates.get(row.id)
+            if raw is not None:
+                row.raw = raw
+        session.commit()
+
+    return scanned, newly_marked
+
+
+def _normalized_filter_values(values: tuple[str, ...]) -> tuple[str, ...]:
+    ordered = ("yes", "no", "unknown")
+    incoming = {str(v).strip().lower() for v in values}
+    return tuple(v for v in ordered if v in incoming)
+
+
+def _filter_signature(filters: "ListingFilters") -> str:
+    payload = {
+        "state": filters.state.upper(),
+        "min_price": filters.min_price,
+        "max_price": filters.max_price,
+        "min_miles": filters.min_miles,
+        "max_miles": filters.max_miles,
+        "trim": (filters.trim or "").strip().lower() or None,
+        "year_min": filters.year_min,
+        "year_max": filters.year_max,
+        "clean_title_values": list(_normalized_filter_values(filters.clean_title_values)),
+        "one_owner_values": list(_normalized_filter_values(filters.one_owner_values)),
+    }
+    packed = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(packed.encode("utf-8")).hexdigest()
+
+
+def describe_filter_conditions(filters: "ListingFilters") -> str:
+    parts = [f"state={filters.state.upper()}"]
+    if filters.min_price is not None:
+        parts.append(f"min_price={filters.min_price}")
+    if filters.max_price is not None:
+        parts.append(f"max_price={filters.max_price}")
+    if filters.min_miles is not None:
+        parts.append(f"min_miles={filters.min_miles}")
+    if filters.max_miles is not None:
+        parts.append(f"max_miles={filters.max_miles}")
+    if filters.trim:
+        parts.append(f"trim~{filters.trim}")
+    if filters.year_min is not None:
+        parts.append(f"year_min={filters.year_min}")
+    if filters.year_max is not None:
+        parts.append(f"year_max={filters.year_max}")
+    if filters.clean_title_values:
+        parts.append(
+            "clean_title in {" + ", ".join(_normalized_filter_values(filters.clean_title_values)) + "}"
+        )
+    if filters.one_owner_values:
+        parts.append(
+            "one_owner in {" + ", ".join(_normalized_filter_values(filters.one_owner_values)) + "}"
+        )
+    return " | ".join(parts)
+
+
+def _price_percentile(sorted_values: list[int], percentile: float) -> int | None:
+    if not sorted_values:
+        return None
+    n = len(sorted_values)
+    if n == 1:
+        return sorted_values[0]
+
+    pos = (n - 1) * percentile
+    lo = int(pos)
+    hi = min(lo + 1, n - 1)
+    if lo == hi:
+        return sorted_values[lo]
+    frac = pos - lo
+    value = sorted_values[lo] + (sorted_values[hi] - sorted_values[lo]) * frac
+    return int(round(value))
+
+
+def _compute_price_stats(rows: list[Listing]) -> dict[str, int | None]:
+    values = sorted(int(row.price) for row in rows if isinstance(row.price, int) and row.price > 0)
+    if not values:
+        return {"lowest": None, "q1": None, "median": None, "q3": None}
+    return {
+        "lowest": values[0],
+        "q1": _price_percentile(values, 0.25),
+        "median": _price_percentile(values, 0.5),
+        "q3": _price_percentile(values, 0.75),
+    }
+
+
+def track_filter_snapshot(
+    session: Session,
+    filters: "ListingFilters",
+    model_y_rows: list[Listing],
+    model_3_rows: list[Listing],
+) -> bool:
+    snapshot_date = utcnow().date()
+    signature = _filter_signature(filters)
+    existing = session.execute(
+        select(FilterSnapshot)
+        .where(
+            FilterSnapshot.filter_signature == signature,
+            FilterSnapshot.snapshot_date == snapshot_date,
+        )
+        .limit(1)
+    ).scalar_one_or_none()
+    if existing:
+        return False
+
+    model_y_count = len(model_y_rows)
+    model_3_count = len(model_3_rows)
+    model_y_price_stats = _compute_price_stats(model_y_rows)
+    model_3_price_stats = _compute_price_stats(model_3_rows)
+
+    row = FilterSnapshot(
+        snapshot_date=snapshot_date,
+        filter_signature=signature,
+        filter_description=describe_filter_conditions(filters),
+        state=filters.state.upper(),
+        min_price=filters.min_price,
+        max_price=filters.max_price,
+        min_miles=filters.min_miles,
+        max_miles=filters.max_miles,
+        trim=filters.trim,
+        year_min=filters.year_min,
+        year_max=filters.year_max,
+        clean_title_values=list(_normalized_filter_values(filters.clean_title_values)),
+        one_owner_values=list(_normalized_filter_values(filters.one_owner_values)),
+        model_y_count=max(0, int(model_y_count)),
+        model_3_count=max(0, int(model_3_count)),
+        model_y_price_lowest=model_y_price_stats["lowest"],
+        model_y_price_q1=model_y_price_stats["q1"],
+        model_y_price_median=model_y_price_stats["median"],
+        model_y_price_q3=model_y_price_stats["q3"],
+        model_3_price_lowest=model_3_price_stats["lowest"],
+        model_3_price_q1=model_3_price_stats["q1"],
+        model_3_price_median=model_3_price_stats["median"],
+        model_3_price_q3=model_3_price_stats["q3"],
+    )
+    session.add(row)
+    session.commit()
+    return True
+
+
+def query_filter_snapshot_history(
+    session: Session, filters: "ListingFilters"
+) -> list[FilterSnapshot]:
+    signature = _filter_signature(filters)
+    stmt = (
+        select(FilterSnapshot)
+        .where(FilterSnapshot.filter_signature == signature)
+        .order_by(FilterSnapshot.snapshot_date.asc())
+    )
+    return list(session.execute(stmt).scalars().all())
 
 
 @dataclass

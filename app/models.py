@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import Boolean, DateTime, Index, Integer, JSON, String, Text
+from sqlalchemy import Boolean, Date, DateTime, Index, Integer, JSON, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -76,4 +76,45 @@ class RunLog(Base):
     items_found: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     items_upserted: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     error_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class FilterSnapshot(Base):
+    __tablename__ = "filter_snapshots"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    snapshot_date: Mapped[date] = mapped_column(Date, nullable=False)
+    filter_signature: Mapped[str] = mapped_column(String(64), nullable=False)
+    filter_description: Mapped[str] = mapped_column(Text, nullable=False)
+    state: Mapped[str | None] = mapped_column(String(2), nullable=True)
+    min_price: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    max_price: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    min_miles: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    max_miles: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    trim: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    year_min: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    year_max: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    clean_title_values: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    one_owner_values: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    model_y_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    model_3_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    model_y_price_lowest: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    model_y_price_q1: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    model_y_price_median: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    model_y_price_q3: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    model_3_price_lowest: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    model_3_price_q1: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    model_3_price_median: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    model_3_price_q3: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utcnow)
+
+    __table_args__ = (
+        Index(
+            "uq_filter_snapshots_signature_date",
+            "filter_signature",
+            "snapshot_date",
+            unique=True,
+        ),
+    )
 

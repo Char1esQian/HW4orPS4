@@ -54,6 +54,9 @@ class Settings:
     total_pages_key: str | None
     page_param: str
     page_size_param: str
+    fsd_page_scan_enabled: bool
+    fsd_page_scan_timeout_seconds: int
+    fsd_page_scan_workers: int
     endpoints: dict[str, str]
 
     def endpoint(self, key: str) -> str:
@@ -101,5 +104,10 @@ def get_settings() -> Settings:
         total_pages_key=os.getenv("MARKETCHECK_TOTAL_PAGES_KEY", "num_pages"),
         page_param=os.getenv("MARKETCHECK_PAGE_PARAM", "page"),
         page_size_param=os.getenv("MARKETCHECK_PAGE_SIZE_PARAM", "rows"),
+        fsd_page_scan_enabled=_as_bool(os.getenv("FSD_PAGE_SCAN_ENABLED"), default=False),
+        fsd_page_scan_timeout_seconds=_as_int(
+            os.getenv("FSD_PAGE_SCAN_TIMEOUT_SECONDS"), default=5
+        ),
+        fsd_page_scan_workers=_as_int(os.getenv("FSD_PAGE_SCAN_WORKERS"), default=6),
         endpoints=endpoints,
     )
