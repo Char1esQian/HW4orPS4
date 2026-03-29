@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import io
+from datetime import datetime
 from urllib.parse import urlencode
 
 from fastapi import Depends, FastAPI, Query, Request
@@ -24,7 +25,7 @@ from app.ingestion import (
     scan_fsd_mentions,
     track_filter_snapshot,
 )
-from app.models import Listing, RunLog
+from app.models import Listing, RunLog, utcnow
 
 app = FastAPI(title="HW4 Finder", version="0.1.0")
 templates = Jinja2Templates(directory="app/templates")
@@ -130,10 +131,18 @@ def _serialize_listing(row: Listing) -> dict:
         "dealer_name": row.dealer_name,
         "first_seen": row.first_seen.isoformat() if row.first_seen else None,
         "last_seen": row.last_seen.isoformat() if row.last_seen else None,
+        "days_seen": _days_seen(row.first_seen),
         "hw4_likely": row.hw4_likely,
         "hw4_reason": row.hw4_reason,
         "raw": row.raw,
     }
+
+
+def _days_seen(first_seen: datetime | None) -> int | None:
+    if first_seen is None:
+        return None
+    delta = utcnow().date() - first_seen.date()
+    return max(0, delta.days)
 
 
 @app.get("/")
@@ -254,6 +263,7 @@ def index(
             "fsd_scanned": fsd_scanned,
             "fsd_new": fsd_new,
             "fsd_scan_error": fsd_scan_error,
+            "days_seen_for": _days_seen,
             "latest_run": latest_run,
         },
     )
@@ -437,6 +447,7 @@ def export_csv(
             "dealer_name",
             "first_seen",
             "last_seen",
+            "days_seen",
             "hw4_likely",
             "hw4_reason",
         ]
@@ -458,6 +469,7 @@ def export_csv(
                 row.dealer_name or "",
                 row.first_seen.isoformat() if row.first_seen else "",
                 row.last_seen.isoformat() if row.last_seen else "",
+                _days_seen(row.first_seen) if row.first_seen else "",
                 str(row.hw4_likely),
                 row.hw4_reason or "",
             ]

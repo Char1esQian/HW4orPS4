@@ -11,6 +11,9 @@
       crossorigin=""
     />
     <style>
+      html {
+        scroll-behavior: smooth;
+      }
       :root {
         --bg: #f5f4ef;
         --paper: #fffdf8;
@@ -19,6 +22,8 @@
         --line: #d8d8cf;
         --accent: #0f766e;
         --accent-strong: #115e59;
+        --accent-soft: rgba(15, 118, 110, 0.11);
+        --hero-shadow: 0 20px 44px rgba(15, 23, 42, 0.08);
         --warn: #92400e;
         --ok-bg: #ecfdf5;
         --ok-ink: #065f46;
@@ -31,8 +36,9 @@
         margin: 0;
         color: var(--ink);
         background:
-          radial-gradient(circle at 10% 0%, #f6efe3 0%, transparent 40%),
-          radial-gradient(circle at 100% 0%, #e8f5f4 0%, transparent 35%),
+          radial-gradient(circle at 8% 0%, rgba(180, 83, 9, 0.12) 0%, transparent 32%),
+          radial-gradient(circle at 100% 0%, rgba(15, 118, 110, 0.16) 0%, transparent 34%),
+          linear-gradient(180deg, #f8f5ef 0%, #f2f4f1 100%),
           var(--bg);
       }
       .container {
@@ -40,24 +46,146 @@
         margin: 24px auto 36px auto;
         padding: 0 14px;
       }
+      .page-jump-nav {
+        position: fixed;
+        top: 96px;
+        right: 18px;
+        z-index: 40;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 132px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgba(255, 253, 248, 0.92);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        backdrop-filter: blur(10px);
+      }
+      .page-jump-title {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #475569;
+      }
+      .page-jump-link {
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        background: #fff;
+        color: #0f172a;
+        padding: 7px 9px;
+        font-size: 12px;
+        text-align: left;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .page-jump-link:hover {
+        border-color: #94a3b8;
+        background: #f8fafc;
+      }
+      .page-jump-link.active {
+        border-color: var(--accent);
+        background: linear-gradient(180deg, #ffffff, #eef8f7);
+        color: var(--accent-strong);
+        box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.08);
+      }
+      section[id],
+      details[id],
+      table[id],
+      form[id] {
+        scroll-margin-top: 20px;
+      }
       .hero {
         background: linear-gradient(130deg, #fffdfa, #f4faf9);
         border: 1px solid var(--line);
         border-radius: 14px;
         padding: 18px;
-        box-shadow: 0 8px 20px rgba(17, 24, 39, 0.05);
+        box-shadow: var(--hero-shadow);
+      }
+      .hero-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+      }
+      .brand-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .brand-mark {
+        width: 180px;
+        height: 58px;
+        flex: 0 0 auto;
+        display: grid;
+        place-items: center;
+        border-radius: 16px;
+        background:
+          linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 247, 237, 0.92));
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.9),
+          0 10px 24px rgba(15, 23, 42, 0.08);
+      }
+      .brand-mark img {
+        width: 150px;
+        max-width: 100%;
+        height: auto;
+        display: block;
+      }
+      .brand-copy {
+        min-width: 0;
+      }
+      .eyebrow {
+        margin: 0 0 6px 0;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #64748b;
       }
       .title {
         margin: 0;
-        font-family: "Cambria", "Georgia", serif;
+        font-family: "Iowan Old Style", "Cambria", "Georgia", serif;
         letter-spacing: 0.3px;
-        font-size: 30px;
+        font-size: 34px;
         color: #0f172a;
       }
       .subtitle {
         margin: 6px 0 0 0;
         color: var(--muted);
         font-size: 14px;
+        max-width: 720px;
+      }
+      .hero-metrics {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+      .metric-chip {
+        min-width: 112px;
+        padding: 10px 12px;
+        border: 1px solid rgba(148, 163, 184, 0.26);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      }
+      .metric-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #64748b;
+      }
+      .metric-value {
+        display: block;
+        margin-top: 4px;
+        font-size: 20px;
+        font-weight: 700;
+        color: #0f172a;
       }
       .toolbar {
         margin-top: 14px;
@@ -69,20 +197,25 @@
       .btn {
         border: 1px solid var(--accent);
         border-radius: 10px;
-        background: var(--accent);
+        background: linear-gradient(180deg, var(--accent), var(--accent-strong));
         color: white;
         padding: 8px 12px;
         font-size: 14px;
         text-decoration: none;
         cursor: pointer;
+        box-shadow: 0 10px 18px rgba(15, 118, 110, 0.16);
+        transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
       }
       .btn:hover {
         background: var(--accent-strong);
         border-color: var(--accent-strong);
+        transform: translateY(-1px);
+        box-shadow: 0 14px 24px rgba(15, 118, 110, 0.18);
       }
       .btn-secondary {
-        background: #fff;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
         color: var(--accent-strong);
+        box-shadow: 0 8px 16px rgba(15, 23, 42, 0.06);
       }
       .filters {
         margin-top: 16px;
@@ -101,7 +234,7 @@
       .filters select {
         border: 1px solid var(--line);
         border-radius: 8px;
-        background: #fff;
+        background: rgba(255, 255, 255, 0.94);
         color: var(--ink);
         padding: 8px 10px;
         font-size: 14px;
@@ -151,6 +284,14 @@
         color: #374151;
         position: sticky;
         top: 0;
+      }
+      th:first-child,
+      td:first-child {
+        padding-left: 12px;
+      }
+      th:last-child,
+      td:last-child {
+        padding-right: 12px;
       }
       td a {
         color: var(--accent-strong);
@@ -209,31 +350,33 @@
       .panel {
         margin-top: 18px;
         border: 1px solid var(--line);
-        border-radius: 12px;
-        background: var(--paper);
-        box-shadow: 0 6px 16px rgba(17, 24, 39, 0.04);
+        border-radius: 16px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 253, 248, 0.96));
+        box-shadow: 0 12px 28px rgba(17, 24, 39, 0.05);
         overflow: visible;
       }
       .panel-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 14px;
+        padding: 14px 16px;
         border-bottom: 1px solid var(--line);
-        background: #fff;
+        background: rgba(255, 255, 255, 0.74);
       }
       .panel-header h2 {
         margin: 0;
-        font-size: 16px;
+        font-size: 17px;
       }
       .pill {
         display: inline-flex;
-        border: 1px solid #c7d2fe;
-        background: #eef2ff;
-        color: #3730a3;
+        border: 1px solid rgba(15, 118, 110, 0.18);
+        background: rgba(15, 118, 110, 0.08);
+        color: #115e59;
         border-radius: 999px;
-        padding: 3px 10px;
+        padding: 4px 10px;
         font-size: 12px;
+        font-weight: 700;
       }
       .table-wrap {
         overflow-x: auto;
@@ -401,7 +544,43 @@
       .muted {
         color: var(--muted);
       }
+      .chart-hover-tooltip {
+        position: fixed;
+        z-index: 80;
+        min-width: 140px;
+        max-width: 220px;
+        padding: 8px 10px;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        border-radius: 10px;
+        background: rgba(15, 23, 42, 0.94);
+        color: #f8fafc;
+        font-size: 12px;
+        line-height: 1.35;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.22);
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(4px);
+        transition: opacity 120ms ease, transform 120ms ease;
+      }
+      .chart-hover-tooltip.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .chart-hover-title {
+        font-weight: 700;
+        color: #ffffff;
+      }
+      .chart-hover-meta {
+        margin-top: 2px;
+        color: #cbd5e1;
+      }
       @media (max-width: 980px) {
+        .hero-top {
+          flex-direction: column;
+        }
+        .hero-metrics {
+          justify-content: flex-start;
+        }
         .filters {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
@@ -410,6 +589,9 @@
         }
         .trend-grid {
           grid-template-columns: 1fr;
+        }
+        .page-jump-nav {
+          display: none;
         }
         .chart-box {
           border-right: 0;
@@ -420,22 +602,59 @@
         .container {
           margin-top: 14px;
         }
+        .brand-row {
+          align-items: flex-start;
+        }
         .filters {
           grid-template-columns: 1fr;
         }
         .title {
-          font-size: 26px;
+          font-size: 28px;
         }
       }
     </style>
   </head>
   <body>
+    <nav class="page-jump-nav" aria-label="Page sections">
+      <div class="page-jump-title">Jump To</div>
+      <a class="page-jump-link" href="#top" data-nav-target="top">Top</a>
+      <a class="page-jump-link" href="#filters" data-nav-target="filters">Filters</a>
+      <button class="page-jump-link" type="button" data-open-details="model-y-trend" data-nav-target="model-y-trend">Y Trend</button>
+      <a class="page-jump-link" href="#table-model-y" data-nav-target="table-model-y">Y Listings</a>
+      <button class="page-jump-link" type="button" data-open-details="model-3-trend" data-nav-target="model-3-trend">3 Trend</button>
+      <a class="page-jump-link" href="#table-model-3" data-nav-target="table-model-3">3 Listings</a>
+    </nav>
     <main class="container">
-      <section class="hero">
-        <h1 class="title">Tesla HW4 Finder</h1>
-        <p class="subtitle">
-          Local MarketCheck tracker for Massachusetts Model Y HW4-likely and Model 3 (2024+).
-        </p>
+      <section id="top" class="hero">
+        <div class="hero-top">
+          <div class="brand-row">
+            <div class="brand-mark" aria-hidden="true">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/6/62/Tesla_Motors_Logo.svg"
+                alt="Tesla wordmark"
+                loading="eager"
+                referrerpolicy="no-referrer"
+              />
+            </div>
+            <div class="brand-copy">
+              <p class="eyebrow">Tesla Inventory Tracker</p>
+              <h1 class="title">HW4 Finder</h1>
+              <p class="subtitle">
+                Local MarketCheck tracker for Massachusetts Model Y HW4-likely and Model 3 (2024+).
+              </p>
+            </div>
+          </div>
+          <div class="hero-metrics">
+            <div class="metric-chip">
+              <span class="metric-label">Model Y</span>
+              <span class="metric-value">{{ model_y_results|length }}</span>
+            </div>
+            <div class="metric-chip">
+              <span class="metric-label">Model 3</span>
+              <span class="metric-value">{{ model_3_results|length }}</span>
+            </div>
+          </div>
+        </div>
 
         <div class="toolbar">
           <form id="refresh-form" method="post" action="{{ refresh_action }}">
@@ -455,7 +674,7 @@
           Applying filters records one availability snapshot per day for the current filter condition.
         </div>
 
-        <form id="filter-form" class="filters" method="get" action="/">
+        <form id="filters" class="filters" method="get" action="/">
           <label>State <input type="text" name="state" value="{{ filters.state }}" maxlength="2" /></label>
           <label>Min Price <input type="number" name="min_price" value="{{ filters.min_price or '' }}" /></label>
           <label>Max Price <input type="number" name="max_price" value="{{ filters.max_price or '' }}" /></label>
@@ -575,12 +794,12 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section id="model-y-panel" class="panel">
         <div class="panel-header">
           <h2>Model Y (HW4 likely) in {{ filters.state }}</h2>
           <span class="pill">{{ model_y_results|length }} matches</span>
         </div>
-        <details class="trend-disclosure">
+        <details id="model-y-trend" class="trend-disclosure">
           <summary>Availability Trend</summary>
           <div class="trend-note">
             Condition: <code>{{ history_filter_description }}</code> | points:
@@ -616,6 +835,7 @@
             <thead>
               <tr>
                 <th>Year</th>
+                <th>Days Seen</th>
                 <th>FSD</th>
                 <th>Trim</th>
                 <th>Price</th>
@@ -655,6 +875,7 @@
                 {% set fsd_mentioned = row.raw.get('_fsd_mentioned') %}
                 {% set fsd_source = row.raw.get('_fsd_source') %}
                 <td>{{ row.year or '' }}</td>
+                <td>{{ days_seen_for(row.first_seen) if row.first_seen else '' }}</td>
                 <td class="fsd-cell">
                   {% if fsd_mentioned %}
                   <span class="fsd-star" title="FSD mention detected from {{ 'listing page' if fsd_source == 'page' else 'API data' }}">&#9733;</span>
@@ -689,19 +910,19 @@
                 <td>{% if row.url %}<a href="{{ row.url }}" target="_blank">Open</a>{% endif %}</td>
               </tr>
               {% else %}
-              <tr><td class="muted" colspan="13">No results.</td></tr>
+              <tr><td class="muted" colspan="14">No results.</td></tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
       </section>
 
-      <section class="panel">
+      <section id="model-3-panel" class="panel">
         <div class="panel-header">
           <h2>Model 3 (2024+) in {{ filters.state }}</h2>
           <span class="pill">{{ model_3_results|length }} matches</span>
         </div>
-        <details class="trend-disclosure">
+        <details id="model-3-trend" class="trend-disclosure">
           <summary>Availability Trend</summary>
           <div class="trend-note">
             Condition: <code>{{ history_filter_description }}</code> | points:
@@ -737,6 +958,7 @@
             <thead>
               <tr>
                 <th>Year</th>
+                <th>Days Seen</th>
                 <th>FSD</th>
                 <th>Trim</th>
                 <th>Price</th>
@@ -775,6 +997,7 @@
                 {% set fsd_mentioned = row.raw.get('_fsd_mentioned') %}
                 {% set fsd_source = row.raw.get('_fsd_source') %}
                 <td>{{ row.year or '' }}</td>
+                <td>{{ days_seen_for(row.first_seen) if row.first_seen else '' }}</td>
                 <td class="fsd-cell">
                   {% if fsd_mentioned %}
                   <span class="fsd-star" title="FSD mention detected from {{ 'listing page' if fsd_source == 'page' else 'API data' }}">&#9733;</span>
@@ -808,7 +1031,7 @@
                 <td>{% if row.url %}<a href="{{ row.url }}" target="_blank">Open</a>{% endif %}</td>
               </tr>
               {% else %}
-              <tr><td class="muted" colspan="12">No results.</td></tr>
+              <tr><td class="muted" colspan="13">No results.</td></tr>
               {% endfor %}
             </tbody>
           </table>
@@ -833,9 +1056,14 @@
         const refreshBtn = document.getElementById("refresh-btn");
         const scanFsdForm = document.getElementById("scan-fsd-form");
         const scanFsdBtn = document.getElementById("scan-fsd-btn");
-        const filterForm = document.getElementById("filter-form");
+        const filterForm = document.getElementById("filters");
         const applyBtn = document.getElementById("apply-btn");
+        const jumpButtons = Array.from(document.querySelectorAll("[data-open-details]"));
+        const jumpLinks = Array.from(document.querySelectorAll("[data-nav-target]"));
         const svgNs = "http://www.w3.org/2000/svg";
+        const chartTooltip = document.createElement("div");
+        chartTooltip.className = "chart-hover-tooltip";
+        document.body.appendChild(chartTooltip);
 
         const setProgress = (message, stateClass) => {
           if (!progressBox) return;
@@ -882,6 +1110,60 @@
             );
           });
         }
+
+        jumpButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            const detailsId = button.getAttribute("data-open-details");
+            if (!detailsId) return;
+            const details = document.getElementById(detailsId);
+            if (!(details instanceof HTMLDetailsElement)) return;
+            details.open = true;
+            setActiveJumpLink(detailsId);
+            details.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        });
+
+        const setActiveJumpLink = (targetId) => {
+          jumpLinks.forEach((link) => {
+            const isActive = link.getAttribute("data-nav-target") === targetId;
+            link.classList.toggle("active", isActive);
+            if (isActive) {
+              link.setAttribute("aria-current", "true");
+            } else {
+              link.removeAttribute("aria-current");
+            }
+          });
+        };
+
+        jumpLinks.forEach((link) => {
+          link.addEventListener("click", () => {
+            const targetId = link.getAttribute("data-nav-target");
+            if (targetId) setActiveJumpLink(targetId);
+          });
+        });
+
+        const observerTargets = jumpLinks
+          .map((link) => document.getElementById(link.getAttribute("data-nav-target") || ""))
+          .filter((node, index, all) => node && all.indexOf(node) === index);
+
+        if (observerTargets.length) {
+          const observer = new IntersectionObserver(
+            (entries) => {
+              const visible = entries
+                .filter((entry) => entry.isIntersecting)
+                .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+              if (visible.length) {
+                setActiveJumpLink(visible[0].target.id);
+              }
+            },
+            {
+              rootMargin: "-18% 0px -58% 0px",
+              threshold: [0.2, 0.45, 0.7],
+            }
+          );
+          observerTargets.forEach((node) => observer.observe(node));
+        }
+        setActiveJumpLink("top");
 
         const fmt = (value) => {
           if (!Number.isFinite(value)) return "";
@@ -964,6 +1246,36 @@
           const el = document.createElementNS(svgNs, name);
           Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, String(v)));
           return el;
+        };
+
+        const setTooltipPosition = (event) => {
+          const offset = 16;
+          const tooltipRect = chartTooltip.getBoundingClientRect();
+          let left = event.clientX + offset;
+          let top = event.clientY + offset;
+
+          if (left + tooltipRect.width > window.innerWidth - 8) {
+            left = event.clientX - tooltipRect.width - offset;
+          }
+          if (top + tooltipRect.height > window.innerHeight - 8) {
+            top = event.clientY - tooltipRect.height - offset;
+          }
+
+          chartTooltip.style.left = `${Math.max(8, left)}px`;
+          chartTooltip.style.top = `${Math.max(8, top)}px`;
+        };
+
+        const showChartTooltip = (event, title, meta) => {
+          chartTooltip.innerHTML = `
+            <div class="chart-hover-title">${escapeHtml(title)}</div>
+            <div class="chart-hover-meta">${escapeHtml(meta)}</div>
+          `;
+          chartTooltip.classList.add("visible");
+          setTooltipPosition(event);
+        };
+
+        const hideChartTooltip = () => {
+          chartTooltip.classList.remove("visible");
         };
 
         const getTrimColor = (trim, fallback) => {
@@ -1113,9 +1425,14 @@
                 stroke: "#ffffff",
                 "stroke-width": 1.2,
               });
-              const tip = createSvgEl("title");
-              tip.textContent = `${p.rawDate}: ${def.label} ${formatValue(p.y)}`;
-              dot.appendChild(tip);
+              dot.style.cursor = "pointer";
+              dot.addEventListener("mouseenter", (event) => {
+                showChartTooltip(event, `${def.label}: ${formatValue(p.y)}`, p.rawDate);
+              });
+              dot.addEventListener("mousemove", (event) => {
+                setTooltipPosition(event);
+              });
+              dot.addEventListener("mouseleave", hideChartTooltip);
               dots.appendChild(dot);
             });
 
@@ -1216,7 +1533,7 @@
 
           const selectByRowId = (
             rowId,
-            { scroll = true, openPopup = true, pan = true } = {}
+            { scroll = true, openPopup = true, pan = true, scrollBlock = "center" } = {}
           ) => {
             const context = rowById.get(rowId);
             if (!context) return;
@@ -1231,7 +1548,9 @@
 
             if (selectedRow) {
               selectedRow.classList.add("row-selected");
-              if (scroll) selectedRow.scrollIntoView({ behavior: "smooth", block: "nearest" });
+              if (scroll) {
+                selectedRow.scrollIntoView({ behavior: "smooth", block: scrollBlock });
+              }
             }
             if (selectedDot) selectedDot.classList.add("selected");
             if (selectedMarker) {
@@ -1372,7 +1691,9 @@
               const tooltip = createSvgEl("title");
               tooltip.textContent = `Trim: ${point.trim || "Unknown"} | Mileage: ${fmt(point.x)} | Price: ${fmt(point.y)}`;
               dot.appendChild(tooltip);
-              dot.addEventListener("click", () => selectByRowId(rowId, { scroll: false }));
+              dot.addEventListener("click", () =>
+                selectByRowId(rowId, { scroll: true, openPopup: true, pan: true, scrollBlock: "center" })
+              );
               dots.appendChild(dot);
               dotByRowId.set(rowId, dot);
             });
