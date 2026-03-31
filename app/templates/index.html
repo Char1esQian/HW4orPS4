@@ -212,6 +212,13 @@
         transform: translateY(-1px);
         box-shadow: 0 14px 24px rgba(15, 118, 110, 0.18);
       }
+      .btn:disabled,
+      .btn[aria-disabled="true"] {
+        cursor: not-allowed;
+        opacity: 0.62;
+        transform: none;
+        box-shadow: none;
+      }
       .btn-secondary {
         background: linear-gradient(180deg, #ffffff, #f8fafc);
         color: var(--accent-strong);
@@ -241,6 +248,13 @@
       }
       .filters .apply {
         align-self: end;
+      }
+      .filters.filters-static input,
+      .filters.filters-static select,
+      .filters.filters-static .filter-check-group,
+      .filters.filters-static .apply {
+        pointer-events: none;
+        opacity: 0.72;
       }
       .filter-check-group {
         display: flex;
@@ -637,10 +651,18 @@
               />
             </div>
             <div class="brand-copy">
-              <p class="eyebrow">Tesla Inventory Tracker</p>
+              <p class="eyebrow">
+                {% if static_mode %}GitHub Pages Daily Build{% else %}Tesla Inventory Tracker{% endif %}
+              </p>
               <h1 class="title">HW4 Finder</h1>
               <p class="subtitle">
+                {% if static_mode %}
+                Hosted snapshot rebuilt from GitHub Actions using the same dashboard layout as the local app.
+                Listings shown here are currently available and match the default hosted criteria for
+                {{ filters.state }}.
+                {% else %}
                 Local MarketCheck tracker for Massachusetts Model Y HW4-likely and Model 3 (2024+).
+                {% endif %}
               </p>
             </div>
           </div>
@@ -657,6 +679,19 @@
         </div>
 
         <div class="toolbar">
+          {% if static_mode %}
+          <button class="btn" type="button" disabled aria-disabled="true" title="Live refresh is available in the local app.">
+            Refresh Listings
+          </button>
+          <button class="btn btn-secondary" type="button" disabled aria-disabled="true" title="FSD scanning is available in the local app.">
+            Scan FSD
+          </button>
+          <a class="btn btn-secondary" href="{{ export_csv_url }}">Export CSV</a>
+          <a class="btn btn-secondary" href="{{ export_json_url }}">Export JSON</a>
+          {% if export_history_url %}
+          <a class="btn btn-secondary" href="{{ export_history_url }}">Export History</a>
+          {% endif %}
+          {% else %}
           <form id="refresh-form" method="post" action="{{ refresh_action }}">
             <button id="refresh-btn" class="btn" type="submit">Refresh Listings</button>
           </form>
@@ -665,16 +700,27 @@
           </form>
           <a class="btn btn-secondary" href="{{ export_csv_url }}">Export CSV</a>
           <a class="btn btn-secondary" href="{{ export_json_url }}">Export JSON</a>
+          {% endif %}
         </div>
 
         <div class="helper">
+          {% if static_mode %}
+          This hosted build refreshes once per day from GitHub Actions. Exports work here, but live refresh,
+          custom tracked filters, and FSD scanning remain local-app features.
+          {% else %}
           `Refresh Listings` pulls fresh data from MarketCheck and upserts it into SQLite.
           `Apply Filters` only filters the listings already stored locally (it does not call MarketCheck).
           `Scan FSD` scans listing pages for FSD mentions only for the current filtered results.
           Applying filters records one availability snapshot per day for the current filter condition.
+          {% endif %}
         </div>
 
-        <form id="filters" class="filters" method="get" action="/">
+        <form
+          id="filters"
+          class="filters{% if static_mode %} filters-static{% endif %}"
+          method="get"
+          action="{% if static_mode %}#filters{% else %}/{% endif %}"
+        >
           <label>State <input type="text" name="state" value="{{ filters.state }}" maxlength="2" /></label>
           <label>Min Price <input type="number" name="min_price" value="{{ filters.min_price or '' }}" /></label>
           <label>Max Price <input type="number" name="max_price" value="{{ filters.max_price or '' }}" /></label>
@@ -757,14 +803,35 @@
               </label>
             </div>
           </div>
-          <button id="apply-btn" class="btn apply" type="submit">Apply & Track</button>
+          <button
+            id="apply-btn"
+            class="btn apply"
+            type="{% if static_mode %}button{% else %}submit{% endif %}"
+            {% if static_mode %}aria-disabled="true"{% endif %}
+            title="{% if static_mode %}Hosted Pages stays fixed to the default daily filter. Use the local app for custom filter tracking.{% endif %}"
+          >
+            Apply &amp; Track
+          </button>
         </form>
 
         <div
           id="progress-box"
-          class="status {% if run_status == 'success' %}success{% elif run_status %}failed{% else %}neutral{% endif %}"
+          class="status {% if static_mode %}neutral{% elif run_status == 'success' %}success{% elif run_status %}failed{% else %}neutral{% endif %}"
         >
-          {% if run_status %}
+          {% if static_mode %}
+          Hosted snapshot built on <strong>{{ generated_at }}</strong>.
+          {% if latest_run %}
+          Latest source refresh ended {{ latest_run.ended_at or latest_run.started_at }}:
+          <strong>{{ latest_run.status }}</strong> | found: {{ latest_run.items_found }} | upserted:
+          {{ latest_run.items_upserted }}
+          {% if latest_run.error_text %}
+          <br />
+          Error: {{ latest_run.error_text }}
+          {% endif %}
+          {% else %}
+          No source refresh metadata is available for this build yet.
+          {% endif %}
+          {% elif run_status %}
           Last refresh: <strong>{{ run_status }}</strong> | found: {{ found or 0 }} | upserted:
           {{ upserted or 0 }}
           {% if error %}
