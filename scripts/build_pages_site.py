@@ -14,6 +14,10 @@ from app.ingestion import import_filter_snapshot_payload, refresh_marketcheck
 from app.site_builder import write_site_payload_files
 
 
+def _read_json_file(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8-sig"))
+
+
 def main() -> int:
     settings = get_settings()
     output_dir = ROOT / "site"
@@ -22,7 +26,7 @@ def main() -> int:
     init_db()
     with SessionLocal() as session:
         if history_path.exists():
-            payload = json.loads(history_path.read_text(encoding="utf-8"))
+            payload = _read_json_file(history_path)
             import_filter_snapshot_payload(session, payload)
 
         refresh_marketcheck(session, state=settings.default_state)
@@ -30,7 +34,7 @@ def main() -> int:
 
         # Persist safe trend history in-repo so scheduled GitHub Actions runs accumulate trends.
         site_history = output_dir / "data" / "history_snapshots.safe.json"
-        history_path.write_text(site_history.read_text(encoding="utf-8"), encoding="utf-8")
+        history_path.write_text(site_history.read_text(encoding="utf-8-sig"), encoding="utf-8")
 
     print(f"Built static site at {output_dir}")
     print(f"Updated safe history file at {history_path}")
