@@ -1,0 +1,73 @@
+name: Build and Deploy GitHub Pages
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 10 * * *"
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build static site
+        env:
+          MARKETCHECK_API_KEY: ${{ secrets.MARKETCHECK_API_KEY }}
+          MARKETCHECK_BASE_URL: https://api.marketcheck.com
+          DEFAULT_STATE: MA
+          DATABASE_URL: sqlite:///./hw4finder.db
+          MARKETCHECK_SEARCH_ENDPOINT: /v2/search/car/active
+          MARKETCHECK_HEALTH_ENDPOINT: /v2/search/car/active
+          MARKETCHECK_API_KEY_IN_QUERY: "true"
+          MARKETCHECK_API_KEY_QUERY_PARAM: api_key
+          MARKETCHECK_PAGE_PARAM: start
+          MARKETCHECK_PAGE_SIZE_PARAM: rows
+          MARKETCHECK_PAGE_SIZE: "50"
+          MARKETCHECK_MAX_PAGES: "200"
+          MARKETCHECK_LISTINGS_KEY: listings
+          MARKETCHECK_TOTAL_PAGES_KEY: ""
+        run: python scripts/build_pages_site.py
+
+      - name: Commit safe history snapshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add history_snapshots.safe.json
+          git diff --cached --quiet || git commit -m "chore: update safe history snapshots"
+          git push
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

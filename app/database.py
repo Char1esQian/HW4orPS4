@@ -56,8 +56,32 @@ def _ensure_filter_snapshot_columns() -> None:
             )
 
 
+def _ensure_listing_columns() -> None:
+    if not engine.url.drivername.startswith("sqlite"):
+        return
+
+    target_columns: dict[str, str] = {
+        "is_available": "BOOLEAN NOT NULL DEFAULT 1",
+    }
+
+    with engine.begin() as conn:
+        table_exists = conn.exec_driver_sql(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='listings'"
+        ).fetchone()
+        if not table_exists:
+            return
+
+        existing_rows = conn.exec_driver_sql("PRAGMA table_info(listings)").fetchall()
+        existing = {str(row[1]) for row in existing_rows if len(row) > 1}
+        for name, sql_type in target_columns.items():
+            if name in existing:
+                continue
+            conn.exec_driver_sql(f"ALTER TABLE listings ADD COLUMN {name} {sql_type}")
+
+
 def init_db() -> None:
     Base.metadata.create_all(bind=engine)
+    _ensure_listing_columns()
     _ensure_filter_snapshot_columns()
 
 

@@ -5,7 +5,7 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 from urllib.parse import urlparse
 
@@ -19,6 +19,7 @@ from app.marketcheck import MarketCheckClient
 from app.models import FilterSnapshot, Listing, RunLog, utcnow
 
 FSD_PATTERN = re.compile(r"\bfsd\b|full[\s-]*self[\s-]*driving", re.IGNORECASE)
+HISTORY_EXPORT_SCHEMA = "hw4finder.filter_snapshots.v1"
 
 
 def _to_int(value: Any) -> int | None:
@@ -408,6 +409,7 @@ def upsert_listings(
             existing.city = city
             existing.state = _normalize_state(payload.get("state"))
             existing.dealer_name = payload.get("dealer_name")
+            existing.is_available = True
             existing.hw4_likely = bool(payload.get("hw4_likely", False))
             existing.hw4_reason = str(payload.get("hw4_reason") or "")
             existing.fingerprint = payload.get("fingerprint")
@@ -430,6 +432,7 @@ def upsert_listings(
             dealer_name=payload.get("dealer_name"),
             first_seen=now,
             last_seen=now,
+            is_available=True,
             hw4_likely=bool(payload.get("hw4_likely", False)),
             hw4_reason=str(payload.get("hw4_reason") or ""),
             fingerprint=payload.get("fingerprint"),
@@ -440,6 +443,28 @@ def upsert_listings(
 
     session.commit()
     return upserted
+
+
+def mark_unavailable_listings(
+    session: Session,
+    *,
+    state: str,
+    cutoff_started_at: datetime,
+    source: str = "marketcheck",
+    models: tuple[str, ...] = ("3", "Y"),
+) -> int:
+    stmt = select(Listing).where(
+        Listing.source == source,
+        Listing.state == state.upper(),
+        Listing.model.in_(models),
+        Listing.is_available.is_(True),
+        Listing.last_seen < cutoff_started_at,
+    )
+    rows = list(session.execute(stmt).scalars().all())
+    for row in rows:
+        row.is_available = False
+    session.commit()
+    return len(rows)
 
 
 def fetch_marketcheck_listings(
@@ -478,6 +503,11 @@ def refresh_marketcheck(
                 workers=settings.fsd_page_scan_workers,
             )
         upserted = upsert_listings(session, adapted)
+        mark_unavailable_listings(
+            session,
+            state=(state or settings.default_state).upper(),
+            cutoff_started_at=run.started_at,
+        )
         run.status = "success"
         run.items_found = len(listings)
         run.items_upserted = upserted
@@ -690,6 +720,204 @@ def query_filter_snapshot_history(
     return list(session.execute(stmt).scalars().all())
 
 
+def _snapshot_to_safe_dict(row: FilterSnapshot) -> dict[str, Any]:
+    return {
+        "snapshot_date": row.snapshot_date.isoformat(),
+        "filter_signature": row.filter_signature,
+        "filter_description": row.filter_description,
+        "state": row.state,
+        "min_price": row.min_price,
+        "max_price": row.max_price,
+        "min_miles": row.min_miles,
+        "max_miles": row.max_miles,
+        "trim": row.trim,
+        "year_min": row.year_min,
+        "year_max": row.year_max,
+        "clean_title_values": list(row.clean_title_values or []),
+        "one_owner_values": list(row.one_owner_values or []),
+        "model_y_count": row.model_y_count,
+        "model_3_count": row.model_3_count,
+        "model_y_price_lowest": row.model_y_price_lowest,
+        "model_y_price_q1": row.model_y_price_q1,
+        "model_y_price_median": row.model_y_price_median,
+        "model_y_price_q3": row.model_y_price_q3,
+        "model_3_price_lowest": row.model_3_price_lowest,
+        "model_3_price_q1": row.model_3_price_q1,
+        "model_3_price_median": row.model_3_price_median,
+        "model_3_price_q3": row.model_3_price_q3,
+        "created_at": row.created_at.isoformat() if row.created_at else None,
+    }
+
+
+def export_filter_snapshot_payload(
+    session: Session, state: str | None = None
+) -> dict[str, Any]:
+    stmt = select(FilterSnapshot)
+    if state:
+        stmt = stmt.where(FilterSnapshot.state == state.strip().upper())
+    stmt = stmt.order_by(FilterSnapshot.snapshot_date.asc(), FilterSnapshot.filter_signature.asc())
+    rows = list(session.execute(stmt).scalars().all())
+    snapshots = [_snapshot_to_safe_dict(row) for row in rows]
+    return {
+        "schema": HISTORY_EXPORT_SCHEMA,
+        "exported_at": utcnow().isoformat(),
+        "count": len(snapshots),
+        "snapshots": snapshots,
+    }
+
+
+def _parse_snapshot_date(value: Any) -> date:
+    if isinstance(value, date):
+        return value
+    if isinstance(value, str):
+        return date.fromisoformat(value.strip())
+    raise ValueError("snapshot_date is required and must be an ISO date string")
+
+
+def _parse_snapshot_int(value: Any) -> int | None:
+    parsed = _to_int(value)
+    if parsed is None:
+        return None
+    return parsed
+
+
+def _parse_snapshot_str_list(value: Any) -> list[str]:
+    if not isinstance(value, (list, tuple)):
+        return []
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for entry in value:
+        text = str(entry).strip().lower()
+        if text not in {"yes", "no", "unknown"}:
+            continue
+        if text in seen:
+            continue
+        seen.add(text)
+        normalized.append(text)
+    return normalized
+
+
+def _snapshot_signature_from_entry(entry: dict[str, Any]) -> str:
+    signature = str(entry.get("filter_signature") or "").strip()
+    if signature:
+        return signature
+
+    filters = ListingFilters(
+        state=str(entry.get("state") or "").strip().upper() or "MA",
+        min_price=_parse_snapshot_int(entry.get("min_price")),
+        max_price=_parse_snapshot_int(entry.get("max_price")),
+        min_miles=_parse_snapshot_int(entry.get("min_miles")),
+        max_miles=_parse_snapshot_int(entry.get("max_miles")),
+        trim=(str(entry.get("trim")).strip() if entry.get("trim") else None),
+        year_min=_parse_snapshot_int(entry.get("year_min")),
+        year_max=_parse_snapshot_int(entry.get("year_max")),
+        clean_title_values=tuple(_parse_snapshot_str_list(entry.get("clean_title_values"))),
+        one_owner_values=tuple(_parse_snapshot_str_list(entry.get("one_owner_values"))),
+    )
+    return _filter_signature(filters)
+
+
+def import_filter_snapshot_payload(
+    session: Session, payload: dict[str, Any] | list[dict[str, Any]]
+) -> dict[str, Any]:
+    if isinstance(payload, list):
+        raw_snapshots = payload
+    elif isinstance(payload, dict):
+        snapshots_field = payload.get("snapshots")
+        if isinstance(snapshots_field, list):
+            raw_snapshots = snapshots_field
+        else:
+            raw_snapshots = []
+    else:
+        raw_snapshots = []
+
+    deduped: dict[tuple[str, date], dict[str, Any]] = {}
+    invalid = 0
+
+    for raw in raw_snapshots:
+        if not isinstance(raw, dict):
+            invalid += 1
+            continue
+        try:
+            snapshot_date = _parse_snapshot_date(raw.get("snapshot_date"))
+            signature = _snapshot_signature_from_entry(raw)
+            if not signature:
+                invalid += 1
+                continue
+            deduped[(signature, snapshot_date)] = raw
+        except Exception:
+            invalid += 1
+            continue
+
+    inserted = 0
+    updated = 0
+
+    for (signature, snapshot_date), raw in deduped.items():
+        existing = session.execute(
+            select(FilterSnapshot)
+            .where(
+                FilterSnapshot.filter_signature == signature,
+                FilterSnapshot.snapshot_date == snapshot_date,
+            )
+            .limit(1)
+        ).scalar_one_or_none()
+
+        state_value = _normalize_state(
+            str(raw.get("state")).strip() if raw.get("state") is not None else None
+        )
+        trim_value = str(raw.get("trim")).strip() if raw.get("trim") else None
+        clean_title_values = _parse_snapshot_str_list(raw.get("clean_title_values"))
+        one_owner_values = _parse_snapshot_str_list(raw.get("one_owner_values"))
+        description = str(raw.get("filter_description") or "").strip()
+        if not description:
+            description = "Imported snapshot"
+
+        row_values = {
+            "filter_signature": signature,
+            "snapshot_date": snapshot_date,
+            "filter_description": description,
+            "state": state_value,
+            "min_price": _parse_snapshot_int(raw.get("min_price")),
+            "max_price": _parse_snapshot_int(raw.get("max_price")),
+            "min_miles": _parse_snapshot_int(raw.get("min_miles")),
+            "max_miles": _parse_snapshot_int(raw.get("max_miles")),
+            "trim": trim_value,
+            "year_min": _parse_snapshot_int(raw.get("year_min")),
+            "year_max": _parse_snapshot_int(raw.get("year_max")),
+            "clean_title_values": clean_title_values,
+            "one_owner_values": one_owner_values,
+            "model_y_count": max(0, _to_int(raw.get("model_y_count")) or 0),
+            "model_3_count": max(0, _to_int(raw.get("model_3_count")) or 0),
+            "model_y_price_lowest": _parse_snapshot_int(raw.get("model_y_price_lowest")),
+            "model_y_price_q1": _parse_snapshot_int(raw.get("model_y_price_q1")),
+            "model_y_price_median": _parse_snapshot_int(raw.get("model_y_price_median")),
+            "model_y_price_q3": _parse_snapshot_int(raw.get("model_y_price_q3")),
+            "model_3_price_lowest": _parse_snapshot_int(raw.get("model_3_price_lowest")),
+            "model_3_price_q1": _parse_snapshot_int(raw.get("model_3_price_q1")),
+            "model_3_price_median": _parse_snapshot_int(raw.get("model_3_price_median")),
+            "model_3_price_q3": _parse_snapshot_int(raw.get("model_3_price_q3")),
+        }
+
+        if existing:
+            for key, value in row_values.items():
+                setattr(existing, key, value)
+            updated += 1
+            continue
+
+        session.add(FilterSnapshot(**row_values))
+        inserted += 1
+
+    session.commit()
+    return {
+        "schema": HISTORY_EXPORT_SCHEMA,
+        "input_count": len(raw_snapshots),
+        "valid_unique_count": len(deduped),
+        "invalid_count": invalid,
+        "inserted": inserted,
+        "updated": updated,
+    }
+
+
 @dataclass
 class ListingFilters:
     state: str
@@ -795,10 +1023,25 @@ def _matches_carfax_filters(row: Listing, filters: ListingFilters) -> bool:
     return True
 
 
+def _latest_successful_refresh_started_at(session: Session) -> datetime | None:
+    return session.execute(
+        select(RunLog.started_at)
+        .where(RunLog.status == "success")
+        .order_by(RunLog.started_at.desc())
+        .limit(1)
+    ).scalar_one_or_none()
+
+
 def query_model_y_hw4(session: Session, filters: ListingFilters) -> list[Listing]:
+    active_cutoff = _latest_successful_refresh_started_at(session)
     stmt = select(Listing).where(
-        Listing.source == "marketcheck", Listing.model == "Y", Listing.hw4_likely.is_(True)
+        Listing.source == "marketcheck",
+        Listing.is_available.is_(True),
+        Listing.model == "Y",
+        Listing.hw4_likely.is_(True),
     )
+    if active_cutoff is not None:
+        stmt = stmt.where(Listing.last_seen >= active_cutoff)
     stmt = _apply_common_filters(stmt, filters)
     stmt = stmt.order_by(Listing.last_seen.desc(), Listing.price.asc())
     rows = list(session.execute(stmt).scalars().all())
@@ -806,12 +1049,16 @@ def query_model_y_hw4(session: Session, filters: ListingFilters) -> list[Listing
 
 
 def query_model3_2024(session: Session, filters: ListingFilters) -> list[Listing]:
+    active_cutoff = _latest_successful_refresh_started_at(session)
     stmt = select(Listing).where(
         Listing.source == "marketcheck",
+        Listing.is_available.is_(True),
         Listing.model == "3",
         Listing.year.is_not(None),
         Listing.year >= 2024,
     )
+    if active_cutoff is not None:
+        stmt = stmt.where(Listing.last_seen >= active_cutoff)
     stmt = _apply_common_filters(stmt, filters)
     stmt = stmt.order_by(Listing.last_seen.desc(), Listing.price.asc())
     rows = list(session.execute(stmt).scalars().all())
@@ -819,13 +1066,17 @@ def query_model3_2024(session: Session, filters: ListingFilters) -> list[Listing
 
 
 def query_export_rows(session: Session, filters: ListingFilters) -> list[Listing]:
+    active_cutoff = _latest_successful_refresh_started_at(session)
     base = select(Listing).where(
         Listing.source == "marketcheck",
+        Listing.is_available.is_(True),
         or_(
             and_(Listing.model == "Y", Listing.hw4_likely.is_(True)),
             and_(Listing.model == "3", Listing.year.is_not(None), Listing.year >= 2024),
         ),
     )
+    if active_cutoff is not None:
+        base = base.where(Listing.last_seen >= active_cutoff)
     stmt = _apply_common_filters(base, filters)
     stmt = stmt.order_by(Listing.model.asc(), Listing.price.asc())
     rows = list(session.execute(stmt).scalars().all())
@@ -833,14 +1084,18 @@ def query_export_rows(session: Session, filters: ListingFilters) -> list[Listing
 
 
 def query_trim_options(session: Session, filters: ListingFilters) -> list[str]:
+    active_cutoff = _latest_successful_refresh_started_at(session)
     base = select(Listing).where(
         Listing.source == "marketcheck",
+        Listing.is_available.is_(True),
         Listing.trim.is_not(None),
         or_(
             and_(Listing.model == "Y", Listing.hw4_likely.is_(True)),
             and_(Listing.model == "3", Listing.year.is_not(None), Listing.year >= 2024),
         ),
     )
+    if active_cutoff is not None:
+        base = base.where(Listing.last_seen >= active_cutoff)
     filters_without_trim = ListingFilters(
         state=filters.state,
         min_price=filters.min_price,

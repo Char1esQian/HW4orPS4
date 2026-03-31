@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HW4 Finder Daily</title>
+    <style>
+      :root {
+        --bg: #f4efe6;
+        --paper: #fffdfa;
+        --ink: #1f2937;
+        --muted: #5f6b7b;
+        --line: #dbd5ca;
+        --accent: #0f766e;
+        --accent-soft: #dff6f2;
+        --blue: #1d4ed8;
+        --blue-soft: #dbeafe;
+        --shadow: rgba(17, 24, 39, 0.08);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family: "Segoe UI Variable Text", "Trebuchet MS", "Helvetica Neue", sans-serif;
+        background:
+          radial-gradient(circle at top left, #f8ead8 0%, transparent 35%),
+          radial-gradient(circle at top right, #e1f2ef 0%, transparent 30%),
+          var(--bg);
+      }
+      .page {
+        max-width: 1220px;
+        margin: 28px auto 40px auto;
+        padding: 0 16px;
+      }
+      .hero {
+        padding: 24px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: linear-gradient(140deg, #fffdf8, #f4fbfa);
+        box-shadow: 0 18px 36px var(--shadow);
+      }
+      .eyebrow {
+        display: inline-block;
+        margin-bottom: 10px;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        border: 1px solid #b8d8d3;
+        background: #edf9f7;
+        color: #0f5c55;
+      }
+      h1 {
+        margin: 0;
+        font-family: Cambria, Georgia, serif;
+        font-size: 36px;
+        letter-spacing: 0.2px;
+      }
+      .subtitle {
+        margin: 10px 0 0 0;
+        color: var(--muted);
+        line-height: 1.5;
+        max-width: 860px;
+      }
+      .meta {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .meta-card {
+        padding: 14px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.72);
+      }
+      .meta-card .label {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .meta-card .value {
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .actions {
+        margin-top: 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .actions a {
+        text-decoration: none;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--ink);
+      }
+      .panel {
+        margin-top: 18px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        overflow: hidden;
+        background: var(--paper);
+        box-shadow: 0 10px 22px var(--shadow);
+      }
+      .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 16px;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+      }
+      .panel-header h2 {
+        margin: 0;
+        font-size: 20px;
+      }
+      .chip {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        border: 1px solid #cfd9e6;
+        background: #f8fbff;
+        color: #274256;
+      }
+      .content {
+        padding: 14px 16px 18px 16px;
+      }
+      .chart-grid {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 14px;
+      }
+      .chart-card {
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: #fff;
+      }
+      .chart-label {
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .chart {
+        width: 100%;
+        height: 300px;
+        display: block;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+      }
+      .table-wrap {
+        overflow-x: auto;
+        margin-top: 14px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th, td {
+        padding: 10px 8px;
+        border-bottom: 1px solid var(--line);
+        font-size: 13px;
+        text-align: left;
+      }
+      th {
+        background: #faf8f4;
+        color: #425061;
+      }
+      tr:hover td {
+        background: #fbfcff;
+      }
+      tr.row-selected td {
+        background: #e0f2fe;
+      }
+      .muted { color: var(--muted); }
+      .dot-point { cursor: pointer; opacity: 0.92; }
+      .dot-point.selected { stroke: #0f172a; stroke-width: 2.5; }
+      .note {
+        margin-top: 10px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      @media (max-width: 980px) {
+        .meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .chart-grid { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 640px) {
+        .meta { grid-template-columns: 1fr; }
+        h1 { font-size: 30px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <div class="eyebrow">Static GitHub Pages build</div>
+        <h1>HW4 Finder Daily</h1>
+        <p class="subtitle">
+          This page is rebuilt automatically from GitHub Actions. It shows only cars currently available
+          and matching the default hosted criteria.
+        </p>
+        <div class="meta">
+          <div class="meta-card">
+            <div class="label">State</div>
+            <div class="value">{{ payload.state }}</div>
+          </div>
+          <div class="meta-card">
+            <div class="label">Max Miles</div>
+            <div class="value">{{ payload.max_miles }}</div>
+          </div>
+          <div class="meta-card">
+            <div class="label">Last Build</div>
+            <div class="value">{{ payload.generated_at }}</div>
+          </div>
+          <div class="meta-card">
+            <div class="label">Refresh Status</div>
+            <div class="value">{{ payload.latest_run.status or 'unknown' }}</div>
+          </div>
+        </div>
+        <div class="actions">
+          <a href="./data/listings.json">Download JSON</a>
+          <a href="./data/listings.csv">Download CSV</a>
+          <a href="./data/history_snapshots.safe.json">Download History</a>
+        </div>
+        <div class="note">Filter condition for hosted trend: <code>{{ payload.filter_description }}</code></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Model Y (HW4 likely)</h2>
+          <div class="chip">{{ payload.model_y_results|length }} available now</div>
+        </div>
+        <div class="content">
+          <div class="chart-grid">
+            <div class="chart-card">
+              <div class="chart-label">Mileage vs Price</div>
+              <svg id="scatter-y" class="chart"></svg>
+            </div>
+            <div class="chart-card">
+              <div class="chart-label">Trend: Count and Median Price</div>
+              <svg id="trend-y" class="chart"></svg>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table id="table-y">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th>Trim</th>
+                  <th>Price</th>
+                  <th>Mileage</th>
+                  <th>City</th>
+                  <th>Dealer</th>
+                  <th>Days Seen</th>
+                  <th>VIN</th>
+                  <th>URL</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Model 3 (2024+)</h2>
+          <div class="chip">{{ payload.model_3_results|length }} available now</div>
+        </div>
+        <div class="content">
+          <div class="chart-grid">
+            <div class="chart-card">
+              <div class="chart-label">Mileage vs Price</div>
+              <svg id="scatter-3" class="chart"></svg>
+            </div>
+            <div class="chart-card">
+              <div class="chart-label">Trend: Count and Median Price</div>
+              <svg id="trend-3" class="chart"></svg>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table id="table-3">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th>Trim</th>
+                  <th>Price</th>
+                  <th>Mileage</th>
+                  <th>City</th>
+                  <th>Dealer</th>
+                  <th>Days Seen</th>
+                  <th>VIN</th>
+                  <th>URL</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script id="site-payload" type="application/json">{{ payload|tojson }}</script>
+    <script>
+      (() => {
+        const payload = JSON.parse(document.getElementById("site-payload").textContent);
+        const svgNs = "http://www.w3.org/2000/svg";
+        const fmt = (value) => {
+          if (value === null || value === undefined || value === "") return "";
+          if (typeof value === "number") {
+            return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(value);
+          }
+          return String(value);
+        };
+        const createSvgEl = (name, attrs = {}) => {
+          const el = document.createElementNS(svgNs, name);
+          Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, String(v)));
+          return el;
+        };
+        const trimColor = (trim, fallback) => {
+          const text = String(trim || "").toLowerCase();
+          if (text.includes("performance")) return "#dc2626";
+          if (text.includes("long range") || text.includes("premium")) return "#16a34a";
+          if (text.includes("base") || text.includes("standard")) return "#ca8a04";
+          return fallback;
+        };
+        const buildTable = (tableId, rows) => {
+          const tbody = document.querySelector(`#${tableId} tbody`);
+          tbody.innerHTML = "";
+          for (const row of rows) {
+            const tr = document.createElement("tr");
+            tr.dataset.rowId = row.id;
+            tr.dataset.mileage = row.mileage ?? "";
+            tr.dataset.price = row.price ?? "";
+            tr.dataset.trim = row.trim ?? "";
+            tr.innerHTML = `
+              <td>${fmt(row.year)}</td>
+              <td>${fmt(row.trim)}</td>
+              <td>${fmt(row.price)}</td>
+              <td>${fmt(row.mileage)}</td>
+              <td>${fmt(row.city)}</td>
+              <td>${fmt(row.dealer_name)}</td>
+              <td>${fmt(row.days_seen)}</td>
+              <td>${fmt(row.vin)}</td>
+              <td>${row.url ? `<a href="${row.url}" target="_blank" rel="noreferrer">Open</a>` : ""}</td>
+            `;
+            tbody.appendChild(tr);
+          }
+          if (!rows.length) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td colspan="9" class="muted">No available cars for this section.</td>`;
+            tbody.appendChild(tr);
+          }
+        };
+        const renderScatter = ({ svgId, tableId, rows, fallbackColor }) => {
+          const svg = document.getElementById(svgId);
+          if (!svg) return;
+          const width = Math.max(640, Math.floor(svg.clientWidth || 760));
+          const height = Math.max(280, Math.floor(svg.clientHeight || 300));
+          svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+          svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+          svg.innerHTML = "";
+          const points = rows.filter((row) => Number.isFinite(row.mileage) && Number.isFinite(row.price));
+          if (!points.length) return;
+          const pad = { top: 18, right: 18, bottom: 42, left: 62 };
+          const plotW = width - pad.left - pad.right;
+          const plotH = height - pad.top - pad.bottom;
+          let minX = Math.min(...points.map((p) => p.mileage));
+          let maxX = Math.max(...points.map((p) => p.mileage));
+          let minY = Math.min(...points.map((p) => p.price));
+          let maxY = Math.max(...points.map((p) => p.price));
+          if (minX === maxX) { minX -= 1; maxX += 1; }
+          if (minY === maxY) { minY -= 1; maxY += 1; }
+          const xPad = (maxX - minX) * 0.06;
+          const yPad = (maxY - minY) * 0.08;
+          minX -= xPad; maxX += xPad; minY -= yPad; maxY += yPad;
+          const xScale = (x) => pad.left + ((x - minX) / (maxX - minX)) * plotW;
+          const yScale = (y) => pad.top + (1 - (y - minY) / (maxY - minY)) * plotH;
+          const grid = createSvgEl("g", { stroke: "#e5e7eb", "stroke-width": 1 });
+          const labels = createSvgEl("g", { fill: "#475569", "font-size": 11 });
+          const axes = createSvgEl("g", { stroke: "#64748b", "stroke-width": 1.25 });
+          for (let i = 0; i <= 4; i += 1) {
+            const t = i / 4;
+            const x = pad.left + t * plotW;
+            const y = pad.top + t * plotH;
+            grid.appendChild(createSvgEl("line", { x1: x, y1: pad.top, x2: x, y2: pad.top + plotH }));
+            grid.appendChild(createSvgEl("line", { x1: pad.left, y1: y, x2: pad.left + plotW, y2: y }));
+            const xt = createSvgEl("text", { x, y: pad.top + plotH + 16, "text-anchor": "middle" });
+            xt.textContent = fmt(minX + t * (maxX - minX));
+            labels.appendChild(xt);
+            const yt = createSvgEl("text", { x: pad.left - 8, y: y + 4, "text-anchor": "end" });
+            yt.textContent = fmt(maxY - t * (maxY - minY));
+            labels.appendChild(yt);
+          }
+          axes.appendChild(createSvgEl("line", { x1: pad.left, y1: pad.top + plotH, x2: pad.left + plotW, y2: pad.top + plotH }));
+          axes.appendChild(createSvgEl("line", { x1: pad.left, y1: pad.top, x2: pad.left, y2: pad.top + plotH }));
+          svg.appendChild(grid);
+          svg.appendChild(axes);
+          svg.appendChild(labels);
+          const dotLayer = createSvgEl("g");
+          let selectedRow = null;
+          let selectedDot = null;
+          const selectPair = (rowEl, dotEl) => {
+            if (selectedRow) selectedRow.classList.remove("row-selected");
+            if (selectedDot) selectedDot.classList.remove("selected");
+            selectedRow = rowEl;
+            selectedDot = dotEl;
+            if (selectedRow) selectedRow.classList.add("row-selected");
+            if (selectedDot) selectedDot.classList.add("selected");
+          };
+          for (const point of points) {
+            const rowEl = document.querySelector(`#${tableId} tbody tr[data-row-id="${point.id}"]`);
+            const dot = createSvgEl("circle", {
+              cx: xScale(point.mileage),
+              cy: yScale(point.price),
+              r: 5,
+              fill: trimColor(point.trim, fallbackColor),
+              class: "dot-point",
+              "vector-effect": "non-scaling-stroke",
+            });
+            const title = createSvgEl("title");
+            title.textContent = `${point.trim || "Unknown"} | ${fmt(point.mileage)} miles | $${fmt(point.price)}`;
+            dot.appendChild(title);
+            if (rowEl) {
+              dot.addEventListener("click", () => selectPair(rowEl, dot));
+              rowEl.addEventListener("click", () => selectPair(rowEl, dot));
+            }
+            dotLayer.appendChild(dot);
+          }
+          svg.appendChild(dotLayer);
+        };
+        const renderTrend = ({ svgId, rows, color }) => {
+          const svg = document.getElementById(svgId);
+          if (!svg) return;
+          const width = Math.max(420, Math.floor(svg.clientWidth || 500));
+          const height = Math.max(280, Math.floor(svg.clientHeight || 300));
+          svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+          svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+          svg.innerHTML = "";
+          if (!rows.length) return;
+          const pad = { top: 18, right: 18, bottom: 42, left: 52 };
+          const plotW = width - pad.left - pad.right;
+          const plotH = height - pad.top - pad.bottom;
+          const countValues = rows.map((row) => row.count || 0);
+          const priceValues = rows.map((row) => row.price_median).filter((v) => Number.isFinite(v));
+          let maxY = Math.max(1, ...countValues, ...(priceValues.length ? priceValues : [1]));
+          const xScale = (i) => pad.left + (rows.length === 1 ? plotW / 2 : (i / (rows.length - 1)) * plotW);
+          const yScale = (y) => pad.top + (1 - y / maxY) * plotH;
+          const grid = createSvgEl("g", { stroke: "#e5e7eb", "stroke-width": 1 });
+          const axes = createSvgEl("g", { stroke: "#64748b", "stroke-width": 1.25 });
+          for (let i = 0; i <= 4; i += 1) {
+            const y = pad.top + (i / 4) * plotH;
+            grid.appendChild(createSvgEl("line", { x1: pad.left, y1: y, x2: pad.left + plotW, y2: y }));
+          }
+          axes.appendChild(createSvgEl("line", { x1: pad.left, y1: pad.top + plotH, x2: pad.left + plotW, y2: pad.top + plotH }));
+          axes.appendChild(createSvgEl("line", { x1: pad.left, y1: pad.top, x2: pad.left, y2: pad.top + plotH }));
+          svg.appendChild(grid);
+          svg.appendChild(axes);
+          const countPath = rows.map((row, i) => `${i === 0 ? "M" : "L"} ${xScale(i)} ${yScale(row.count || 0)}`).join(" ");
+          svg.appendChild(createSvgEl("path", { d: countPath, fill: "none", stroke: color, "stroke-width": 3 }));
+          const priceRows = rows.filter((row) => Number.isFinite(row.price_median));
+          if (priceRows.length) {
+            const medianPath = rows
+              .filter((row) => Number.isFinite(row.price_median))
+              .map((row, idx, arr) => {
+                const originalIndex = rows.indexOf(row);
+                return `${idx === 0 ? "M" : "L"} ${xScale(originalIndex)} ${yScale(row.price_median)}`;
+              })
+              .join(" ");
+            svg.appendChild(createSvgEl("path", { d: medianPath, fill: "none", stroke: "#1d4ed8", "stroke-width": 2, "stroke-dasharray": "7 5" }));
+          }
+        };
+
+        buildTable("table-y", payload.model_y_results);
+        buildTable("table-3", payload.model_3_results);
+        renderScatter({ svgId: "scatter-y", tableId: "table-y", rows: payload.model_y_results, fallbackColor: "#0f766e" });
+        renderScatter({ svgId: "scatter-3", tableId: "table-3", rows: payload.model_3_results, fallbackColor: "#2563eb" });
+        renderTrend({ svgId: "trend-y", rows: payload.history_model_y, color: "#0f766e" });
+        renderTrend({ svgId: "trend-3", rows: payload.history_model_3, color: "#2563eb" });
+      })();
+    </script>
+  </body>
+</html>

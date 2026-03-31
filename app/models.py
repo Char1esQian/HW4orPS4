@@ -35,6 +35,7 @@ class Listing(Base):
     dealer_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     first_seen: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utcnow)
     last_seen: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utcnow)
+    is_available: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     hw4_likely: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     hw4_reason: Mapped[str] = mapped_column(Text, nullable=False, default="")
     fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)

@@ -5,7 +5,7 @@ import io
 from datetime import datetime
 from urllib.parse import urlencode
 
-from fastapi import Depends, FastAPI, Query, Request
+from fastapi import Body, Depends, FastAPI, Query, Request
 from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
@@ -16,6 +16,8 @@ from app.database import get_db, init_db
 from app.ingestion import (
     ListingFilters,
     describe_filter_conditions,
+    export_filter_snapshot_payload,
+    import_filter_snapshot_payload,
     query_export_rows,
     query_filter_snapshot_history,
     query_model3_2024,
@@ -480,3 +482,21 @@ def export_csv(
         media_type="text/csv",
         headers={"Content-Disposition": 'attachment; filename="hw4finder_export.csv"'},
     )
+
+
+@app.get("/history/export.json")
+def export_history_json(
+    state: str | None = Query(None),
+    db: Session = Depends(get_db),
+):
+    payload = export_filter_snapshot_payload(db, state=state)
+    return JSONResponse(content=payload)
+
+
+@app.post("/history/import.json")
+def import_history_json(
+    payload: dict | list[dict] = Body(...),
+    db: Session = Depends(get_db),
+):
+    result = import_filter_snapshot_payload(db, payload)
+    return JSONResponse(content=result)
