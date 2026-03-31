@@ -40,6 +40,11 @@ def _days_seen(first_seen: datetime | None) -> int | None:
 
 
 def serialize_listing_safe(row: Listing) -> dict[str, Any]:
+    raw = row.raw if isinstance(row.raw, dict) else {}
+    dealer = raw.get("dealer") if isinstance(raw.get("dealer"), dict) else {}
+    mc_dealership = (
+        raw.get("mc_dealership") if isinstance(raw.get("mc_dealership"), dict) else {}
+    )
     return {
         "id": row.id,
         "source": row.source,
@@ -53,6 +58,8 @@ def serialize_listing_safe(row: Listing) -> dict[str, Any]:
         "city": row.city,
         "state": row.state,
         "dealer_name": row.dealer_name,
+        "dealer_latitude": dealer.get("latitude") or mc_dealership.get("latitude"),
+        "dealer_longitude": dealer.get("longitude") or mc_dealership.get("longitude"),
         "first_seen": row.first_seen.isoformat() if row.first_seen else None,
         "last_seen": row.last_seen.isoformat() if row.last_seen else None,
         "days_seen": _days_seen(row.first_seen),

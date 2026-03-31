@@ -4,7 +4,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>HW4 Finder Daily</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
     <style>
+      html {
+        scroll-behavior: smooth;
+      }
       :root {
         --bg: #f4efe6;
         --paper: #fffdfa;
@@ -12,12 +21,11 @@
         --muted: #5f6b7b;
         --line: #dbd5ca;
         --accent: #0f766e;
-        --accent-soft: #dff6f2;
-        --blue: #1d4ed8;
-        --blue-soft: #dbeafe;
         --shadow: rgba(17, 24, 39, 0.08);
       }
-      * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
       body {
         margin: 0;
         color: var(--ink);
@@ -31,6 +39,49 @@
         max-width: 1220px;
         margin: 28px auto 40px auto;
         padding: 0 16px;
+      }
+      .page-jump-nav {
+        position: fixed;
+        top: 96px;
+        right: 18px;
+        z-index: 40;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 148px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgba(255, 253, 248, 0.92);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        backdrop-filter: blur(10px);
+      }
+      .page-jump-title {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #475569;
+      }
+      .page-jump-link {
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        background: #fff;
+        color: #0f172a;
+        padding: 7px 9px;
+        font-size: 12px;
+        text-align: left;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .page-jump-link.active {
+        border-color: var(--accent);
+        background: linear-gradient(180deg, #ffffff, #eef8f7);
+        color: #0f5c55;
+      }
+      .page-jump-link:hover {
+        border-color: #94a3b8;
+        background: #f8fafc;
       }
       .hero {
         padding: 24px;
@@ -71,7 +122,7 @@
         padding: 14px;
         border-radius: 12px;
         border: 1px solid var(--line);
-        background: rgba(255,255,255,0.72);
+        background: rgba(255, 255, 255, 0.72);
       }
       .meta-card .label {
         font-size: 12px;
@@ -134,7 +185,8 @@
         grid-template-columns: 1.5fr 1fr;
         gap: 14px;
       }
-      .chart-card {
+      .chart-card,
+      .map-box {
         padding: 12px;
         border-radius: 12px;
         border: 1px solid var(--line);
@@ -153,6 +205,17 @@
         border-radius: 10px;
         background: #fff;
       }
+      .dealer-map {
+        width: 100%;
+        height: 320px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+      }
+      .map-empty {
+        margin-top: 8px;
+        font-size: 12px;
+      }
       .table-wrap {
         overflow-x: auto;
         margin-top: 14px;
@@ -161,7 +224,8 @@
         width: 100%;
         border-collapse: collapse;
       }
-      th, td {
+      th,
+      td {
         padding: 10px 8px;
         border-bottom: 1px solid var(--line);
         font-size: 13px;
@@ -177,27 +241,53 @@
       tr.row-selected td {
         background: #e0f2fe;
       }
-      .muted { color: var(--muted); }
-      .dot-point { cursor: pointer; opacity: 0.92; }
-      .dot-point.selected { stroke: #0f172a; stroke-width: 2.5; }
+      .muted {
+        color: var(--muted);
+      }
+      .dot-point {
+        cursor: pointer;
+        opacity: 0.92;
+      }
+      .dot-point.selected {
+        stroke: #0f172a;
+        stroke-width: 2.5;
+      }
       .note {
         margin-top: 10px;
         font-size: 13px;
         color: var(--muted);
       }
       @media (max-width: 980px) {
-        .meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .chart-grid { grid-template-columns: 1fr; }
+        .meta {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .chart-grid {
+          grid-template-columns: 1fr;
+        }
+        .page-jump-nav {
+          display: none;
+        }
       }
       @media (max-width: 640px) {
-        .meta { grid-template-columns: 1fr; }
-        h1 { font-size: 30px; }
+        .meta {
+          grid-template-columns: 1fr;
+        }
+        h1 {
+          font-size: 30px;
+        }
       }
     </style>
   </head>
   <body>
+    <nav class="page-jump-nav">
+      <div class="page-jump-title">Jump</div>
+      <a class="page-jump-link" href="#summary" data-nav-target="summary">Summary</a>
+      <a class="page-jump-link" href="#model-y" data-nav-target="model-y">Model Y</a>
+      <a class="page-jump-link" href="#model-3" data-nav-target="model-3">Model 3</a>
+    </nav>
+
     <main class="page">
-      <section class="hero">
+      <section id="summary" class="hero">
         <div class="eyebrow">Static GitHub Pages build</div>
         <h1>HW4 Finder Daily</h1>
         <p class="subtitle">
@@ -219,7 +309,7 @@
           </div>
           <div class="meta-card">
             <div class="label">Refresh Status</div>
-            <div class="value">{{ payload.latest_run.status or 'unknown' }}</div>
+            <div class="value">{{ payload.latest_run.status or "unknown" }}</div>
           </div>
         </div>
         <div class="actions">
@@ -230,7 +320,7 @@
         <div class="note">Filter condition for hosted trend: <code>{{ payload.filter_description }}</code></div>
       </section>
 
-      <section class="panel">
+      <section id="model-y" class="panel">
         <div class="panel-header">
           <h2>Model Y (HW4 likely)</h2>
           <div class="chip">{{ payload.model_y_results|length }} available now</div>
@@ -245,6 +335,11 @@
               <div class="chart-label">Trend: Count and Median Price</div>
               <svg id="trend-y" class="chart"></svg>
             </div>
+          </div>
+          <div class="map-box">
+            <div class="chart-label">Dealer map</div>
+            <div id="map-y" class="dealer-map"></div>
+            <div id="map-y-empty" class="map-empty muted"></div>
           </div>
           <div class="table-wrap">
             <table id="table-y">
@@ -267,7 +362,7 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section id="model-3" class="panel">
         <div class="panel-header">
           <h2>Model 3 (2024+)</h2>
           <div class="chip">{{ payload.model_3_results|length }} available now</div>
@@ -282,6 +377,11 @@
               <div class="chart-label">Trend: Count and Median Price</div>
               <svg id="trend-3" class="chart"></svg>
             </div>
+          </div>
+          <div class="map-box">
+            <div class="chart-label">Dealer map</div>
+            <div id="map-3" class="dealer-map"></div>
+            <div id="map-3-empty" class="map-empty muted"></div>
           </div>
           <div class="table-wrap">
             <table id="table-3">
@@ -305,11 +405,17 @@
       </section>
     </main>
 
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
     <script id="site-payload" type="application/json">{{ payload|tojson }}</script>
     <script>
       (() => {
         const payload = JSON.parse(document.getElementById("site-payload").textContent);
         const svgNs = "http://www.w3.org/2000/svg";
+
         const fmt = (value) => {
           if (value === null || value === undefined || value === "") return "";
           if (typeof value === "number") {
@@ -317,11 +423,13 @@
           }
           return String(value);
         };
+
         const createSvgEl = (name, attrs = {}) => {
           const el = document.createElementNS(svgNs, name);
           Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, String(v)));
           return el;
         };
+
         const trimColor = (trim, fallback) => {
           const text = String(trim || "").toLowerCase();
           if (text.includes("performance")) return "#dc2626";
@@ -329,6 +437,26 @@
           if (text.includes("base") || text.includes("standard")) return "#ca8a04";
           return fallback;
         };
+
+        const setupJumpNav = () => {
+          const links = Array.from(document.querySelectorAll(".page-jump-link[data-nav-target]"));
+          const sections = links
+            .map((link) => document.getElementById(link.getAttribute("data-nav-target")))
+            .filter(Boolean);
+          const update = () => {
+            let activeId = sections.length ? sections[0].id : "";
+            for (const section of sections) {
+              const rect = section.getBoundingClientRect();
+              if (rect.top <= 140) activeId = section.id;
+            }
+            links.forEach((link) => {
+              link.classList.toggle("active", link.getAttribute("data-nav-target") === activeId);
+            });
+          };
+          window.addEventListener("scroll", update, { passive: true });
+          update();
+        };
+
         const buildTable = (tableId, rows) => {
           const tbody = document.querySelector(`#${tableId} tbody`);
           tbody.innerHTML = "";
@@ -338,6 +466,10 @@
             tr.dataset.mileage = row.mileage ?? "";
             tr.dataset.price = row.price ?? "";
             tr.dataset.trim = row.trim ?? "";
+            tr.dataset.latitude = row.dealer_latitude ?? "";
+            tr.dataset.longitude = row.dealer_longitude ?? "";
+            tr.dataset.dealer = row.dealer_name ?? "";
+            tr.dataset.city = row.city ?? "";
             tr.innerHTML = `
               <td>${fmt(row.year)}</td>
               <td>${fmt(row.trim)}</td>
@@ -357,7 +489,29 @@
             tbody.appendChild(tr);
           }
         };
-        const renderScatter = ({ svgId, tableId, rows, fallbackColor }) => {
+
+        const createSelectionController = (tableId) => {
+          let selectedRow = null;
+          let selectedDot = null;
+          let focusMap = null;
+          return {
+            setMapFocus(fn) {
+              focusMap = fn;
+            },
+            select(rowId, dotEl = null) {
+              if (selectedRow) selectedRow.classList.remove("row-selected");
+              if (selectedDot) selectedDot.classList.remove("selected");
+              selectedRow = document.querySelector(`#${tableId} tbody tr[data-row-id="${rowId}"]`);
+              selectedDot = dotEl || document.querySelector(`.dot-point[data-row-id="${rowId}"]`);
+              if (selectedRow) selectedRow.classList.add("row-selected");
+              if (selectedDot) selectedDot.classList.add("selected");
+              if (selectedRow) selectedRow.scrollIntoView({ behavior: "smooth", block: "nearest" });
+              if (focusMap) focusMap(rowId);
+            },
+          };
+        };
+
+        const renderScatter = ({ svgId, tableId, rows, fallbackColor, selection }) => {
           const svg = document.getElementById(svgId);
           if (!svg) return;
           const width = Math.max(640, Math.floor(svg.clientWidth || 760));
@@ -365,8 +519,10 @@
           svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
           svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
           svg.innerHTML = "";
+
           const points = rows.filter((row) => Number.isFinite(row.mileage) && Number.isFinite(row.price));
           if (!points.length) return;
+
           const pad = { top: 18, right: 18, bottom: 42, left: 62 };
           const plotW = width - pad.left - pad.right;
           const plotH = height - pad.top - pad.bottom;
@@ -374,13 +530,24 @@
           let maxX = Math.max(...points.map((p) => p.mileage));
           let minY = Math.min(...points.map((p) => p.price));
           let maxY = Math.max(...points.map((p) => p.price));
-          if (minX === maxX) { minX -= 1; maxX += 1; }
-          if (minY === maxY) { minY -= 1; maxY += 1; }
+          if (minX === maxX) {
+            minX -= 1;
+            maxX += 1;
+          }
+          if (minY === maxY) {
+            minY -= 1;
+            maxY += 1;
+          }
           const xPad = (maxX - minX) * 0.06;
           const yPad = (maxY - minY) * 0.08;
-          minX -= xPad; maxX += xPad; minY -= yPad; maxY += yPad;
+          minX -= xPad;
+          maxX += xPad;
+          minY -= yPad;
+          maxY += yPad;
+
           const xScale = (x) => pad.left + ((x - minX) / (maxX - minX)) * plotW;
           const yScale = (y) => pad.top + (1 - (y - minY) / (maxY - minY)) * plotH;
+
           const grid = createSvgEl("g", { stroke: "#e5e7eb", "stroke-width": 1 });
           const labels = createSvgEl("g", { fill: "#475569", "font-size": 11 });
           const axes = createSvgEl("g", { stroke: "#64748b", "stroke-width": 1.25 });
@@ -402,17 +569,8 @@
           svg.appendChild(grid);
           svg.appendChild(axes);
           svg.appendChild(labels);
+
           const dotLayer = createSvgEl("g");
-          let selectedRow = null;
-          let selectedDot = null;
-          const selectPair = (rowEl, dotEl) => {
-            if (selectedRow) selectedRow.classList.remove("row-selected");
-            if (selectedDot) selectedDot.classList.remove("selected");
-            selectedRow = rowEl;
-            selectedDot = dotEl;
-            if (selectedRow) selectedRow.classList.add("row-selected");
-            if (selectedDot) selectedDot.classList.add("selected");
-          };
           for (const point of points) {
             const rowEl = document.querySelector(`#${tableId} tbody tr[data-row-id="${point.id}"]`);
             const dot = createSvgEl("circle", {
@@ -422,18 +580,20 @@
               fill: trimColor(point.trim, fallbackColor),
               class: "dot-point",
               "vector-effect": "non-scaling-stroke",
+              "data-row-id": point.id,
             });
             const title = createSvgEl("title");
             title.textContent = `${point.trim || "Unknown"} | ${fmt(point.mileage)} miles | $${fmt(point.price)}`;
             dot.appendChild(title);
             if (rowEl) {
-              dot.addEventListener("click", () => selectPair(rowEl, dot));
-              rowEl.addEventListener("click", () => selectPair(rowEl, dot));
+              dot.addEventListener("click", () => selection.select(point.id, dot));
+              rowEl.addEventListener("click", () => selection.select(point.id, dot));
             }
             dotLayer.appendChild(dot);
           }
           svg.appendChild(dotLayer);
         };
+
         const renderTrend = ({ svgId, rows, color }) => {
           const svg = document.getElementById(svgId);
           if (!svg) return;
@@ -443,14 +603,16 @@
           svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
           svg.innerHTML = "";
           if (!rows.length) return;
+
           const pad = { top: 18, right: 18, bottom: 42, left: 52 };
           const plotW = width - pad.left - pad.right;
           const plotH = height - pad.top - pad.bottom;
           const countValues = rows.map((row) => row.count || 0);
           const priceValues = rows.map((row) => row.price_median).filter((v) => Number.isFinite(v));
-          let maxY = Math.max(1, ...countValues, ...(priceValues.length ? priceValues : [1]));
+          const maxY = Math.max(1, ...countValues, ...(priceValues.length ? priceValues : [1]));
           const xScale = (i) => pad.left + (rows.length === 1 ? plotW / 2 : (i / (rows.length - 1)) * plotW);
           const yScale = (y) => pad.top + (1 - y / maxY) * plotH;
+
           const grid = createSvgEl("g", { stroke: "#e5e7eb", "stroke-width": 1 });
           const axes = createSvgEl("g", { stroke: "#64748b", "stroke-width": 1.25 });
           for (let i = 0; i <= 4; i += 1) {
@@ -461,27 +623,114 @@
           axes.appendChild(createSvgEl("line", { x1: pad.left, y1: pad.top, x2: pad.left, y2: pad.top + plotH }));
           svg.appendChild(grid);
           svg.appendChild(axes);
+
           const countPath = rows.map((row, i) => `${i === 0 ? "M" : "L"} ${xScale(i)} ${yScale(row.count || 0)}`).join(" ");
           svg.appendChild(createSvgEl("path", { d: countPath, fill: "none", stroke: color, "stroke-width": 3 }));
-          const priceRows = rows.filter((row) => Number.isFinite(row.price_median));
-          if (priceRows.length) {
-            const medianPath = rows
-              .filter((row) => Number.isFinite(row.price_median))
-              .map((row, idx, arr) => {
+
+          const medianRows = rows.filter((row) => Number.isFinite(row.price_median));
+          if (medianRows.length) {
+            const medianPath = medianRows
+              .map((row, idx) => {
                 const originalIndex = rows.indexOf(row);
                 return `${idx === 0 ? "M" : "L"} ${xScale(originalIndex)} ${yScale(row.price_median)}`;
               })
               .join(" ");
-            svg.appendChild(createSvgEl("path", { d: medianPath, fill: "none", stroke: "#1d4ed8", "stroke-width": 2, "stroke-dasharray": "7 5" }));
+            svg.appendChild(
+              createSvgEl("path", {
+                d: medianPath,
+                fill: "none",
+                stroke: "#1d4ed8",
+                "stroke-width": 2,
+                "stroke-dasharray": "7 5",
+              })
+            );
           }
+        };
+
+        const attachMap = ({ mapId, mapEmptyId, tableId, rows, selection }) => {
+          const mapEl = document.getElementById(mapId);
+          const emptyEl = document.getElementById(mapEmptyId);
+          if (!mapEl) return;
+          if (!window.L) {
+            if (emptyEl) emptyEl.textContent = "Map library failed to load.";
+            return;
+          }
+
+          const map = window.L.map(mapEl, { scrollWheelZoom: false });
+          window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "&copy; OpenStreetMap contributors",
+          }).addTo(map);
+
+          const markers = new Map();
+          const coords = [];
+          rows.forEach((row) => {
+            const lat = Number(row.dealer_latitude);
+            const lng = Number(row.dealer_longitude);
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+            const marker = window.L.marker([lat, lng]);
+            marker.bindPopup(`<strong>${row.dealer_name || "Dealer"}</strong><br/>${row.city || "Unknown city"}`);
+            marker.addTo(map);
+            markers.set(row.id, marker);
+            coords.push([lat, lng]);
+            marker.on("click", () => selection.select(row.id));
+          });
+
+          if (!coords.length) {
+            map.setView([42.3601, -71.0589], 7);
+            if (emptyEl) emptyEl.textContent = "No dealer coordinates in this result set yet.";
+          } else if (coords.length === 1) {
+            map.setView(coords[0], 10);
+            if (emptyEl) emptyEl.textContent = "Tip: click a row or dot to focus the dealer marker.";
+          } else {
+            map.fitBounds(coords, { padding: [24, 24] });
+            if (emptyEl) emptyEl.textContent = "Tip: click a row or dot to focus the dealer marker.";
+          }
+
+          selection.setMapFocus((rowId) => {
+            const marker = markers.get(rowId);
+            if (!marker) return;
+            map.panTo(marker.getLatLng());
+            marker.openPopup();
+          });
         };
 
         buildTable("table-y", payload.model_y_results);
         buildTable("table-3", payload.model_3_results);
-        renderScatter({ svgId: "scatter-y", tableId: "table-y", rows: payload.model_y_results, fallbackColor: "#0f766e" });
-        renderScatter({ svgId: "scatter-3", tableId: "table-3", rows: payload.model_3_results, fallbackColor: "#2563eb" });
+
+        const ySelection = createSelectionController("table-y");
+        const threeSelection = createSelectionController("table-3");
+
+        renderScatter({
+          svgId: "scatter-y",
+          tableId: "table-y",
+          rows: payload.model_y_results,
+          fallbackColor: "#0f766e",
+          selection: ySelection,
+        });
+        renderScatter({
+          svgId: "scatter-3",
+          tableId: "table-3",
+          rows: payload.model_3_results,
+          fallbackColor: "#2563eb",
+          selection: threeSelection,
+        });
         renderTrend({ svgId: "trend-y", rows: payload.history_model_y, color: "#0f766e" });
         renderTrend({ svgId: "trend-3", rows: payload.history_model_3, color: "#2563eb" });
+        attachMap({
+          mapId: "map-y",
+          mapEmptyId: "map-y-empty",
+          tableId: "table-y",
+          rows: payload.model_y_results,
+          selection: ySelection,
+        });
+        attachMap({
+          mapId: "map-3",
+          mapEmptyId: "map-3-empty",
+          tableId: "table-3",
+          rows: payload.model_3_results,
+          selection: threeSelection,
+        });
+        setupJumpNav();
       })();
     </script>
   </body>
