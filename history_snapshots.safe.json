@@ -1,7 +1,7 @@
 {
   "schema": "hw4finder.filter_snapshots.v1",
-  "exported_at": "2026-04-01T11:13:55.221725",
-  "count": 10,
+  "exported_at": "2026-04-02T11:10:18.142303",
+  "count": 11,
   "snapshots": [
     {
       "snapshot_date": "2026-02-26",
@@ -27,7 +27,7 @@
       "model_3_price_q1": 32940,
       "model_3_price_median": 35244,
       "model_3_price_q3": 39867,
-      "created_at": "2026-04-01T11:13:53.026060"
+      "created_at": "2026-04-02T11:10:16.107721"
     },
     {
       "snapshot_date": "2026-02-27",
@@ -53,7 +53,7 @@
       "model_3_price_q1": 33990,
       "model_3_price_median": 36990,
       "model_3_price_q3": 39590,
-      "created_at": "2026-04-01T11:13:53.026069"
+      "created_at": "2026-04-02T11:10:16.107731"
     },
     {
       "snapshot_date": "2026-02-28",
@@ -79,7 +79,7 @@
       "model_3_price_q1": 33990,
       "model_3_price_median": 36990,
       "model_3_price_q3": 39590,
-      "created_at": "2026-04-01T11:13:53.026076"
+      "created_at": "2026-04-02T11:10:16.107738"
     },
     {
       "snapshot_date": "2026-03-03",
@@ -105,7 +105,7 @@
       "model_3_price_q1": 33990,
       "model_3_price_median": 36990,
       "model_3_price_q3": 39590,
-      "created_at": "2026-04-01T11:13:53.026086"
+      "created_at": "2026-04-02T11:10:16.107748"
     },
     {
       "snapshot_date": "2026-03-11",
@@ -131,7 +131,7 @@
       "model_3_price_q1": 33944,
       "model_3_price_median": 36990,
       "model_3_price_q3": 39294,
-      "created_at": "2026-04-01T11:13:53.026092"
+      "created_at": "2026-04-02T11:10:16.107753"
     },
     {
       "snapshot_date": "2026-03-19",
@@ -157,7 +157,7 @@
       "model_3_price_q1": 33921,
       "model_3_price_median": 36744,
       "model_3_price_q3": 39442,
-      "created_at": "2026-04-01T11:13:53.026096"
+      "created_at": "2026-04-02T11:10:16.107758"
     },
     {
       "snapshot_date": "2026-03-24",
@@ -183,7 +183,7 @@
       "model_3_price_q1": 33944,
       "model_3_price_median": 36990,
       "model_3_price_q3": 39790,
-      "created_at": "2026-04-01T11:13:53.026101"
+      "created_at": "2026-04-02T11:10:16.107762"
     },
     {
       "snapshot_date": "2026-03-30",
@@ -209,7 +209,7 @@
       "model_3_price_q1": 33967,
       "model_3_price_median": 36990,
       "model_3_price_q3": 40240,
-      "created_at": "2026-04-01T11:13:53.026107"
+      "created_at": "2026-04-02T11:10:16.107768"
     },
     {
       "snapshot_date": "2026-03-31",
@@ -235,7 +235,7 @@
       "model_3_price_q1": 35998,
       "model_3_price_median": 39590,
       "model_3_price_q3": 41990,
-      "created_at": "2026-04-01T11:13:53.026111"
+      "created_at": "2026-04-02T11:10:16.107773"
     },
     {
       "snapshot_date": "2026-04-01",
@@ -261,7 +261,33 @@
       "model_3_price_q1": 36896,
       "model_3_price_median": 40790,
       "model_3_price_q3": 43197,
-      "created_at": "2026-04-01T11:13:55.211061"
+      "created_at": "2026-04-02T11:10:16.107778"
+    },
+    {
+      "snapshot_date": "2026-04-02",
+      "filter_signature": "900fbd00895a38eaff2e08aa2ef3f3c20983a766b617563944a2b423fffc60a8",
+      "filter_description": "state=MA | max_miles=40000",
+      "state": "MA",
+      "min_price": null,
+      "max_price": null,
+      "min_miles": null,
+      "max_miles": 40000,
+      "trim": null,
+      "year_min": null,
+      "year_max": null,
+      "clean_title_values": [],
+      "one_owner_values": [],
+      "model_y_count": 37,
+      "model_3_count": 8,
+      "model_y_price_lowest": 30999,
+      "model_y_price_q1": 35070,
+      "model_y_price_median": 38132,
+      "model_y_price_q3": 43218,
+      "model_3_price_lowest": 31600,
+      "model_3_price_q1": 38046,
+      "model_3_price_median": 40490,
+      "model_3_price_q3": 42392,
+      "created_at": "2026-04-02T11:10:18.130924"
     }
   ]
 }
