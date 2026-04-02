@@ -37,10 +37,11 @@ This repo can also be hosted as a static GitHub Pages site that rebuilds once pe
 
 ### What the workflow does
 - imports `history_snapshots.safe.json` from the repo if present
+- imports `listing_seen.safe.json` from the repo if present so hosted `days seen` stays stable across daily rebuilds
 - fetches current MarketCheck listings using the GitHub secret
 - rebuilds a static site into `site/`
 - deploys `site/` to GitHub Pages
-- commits back only `history_snapshots.safe.json` so trend history persists across daily runs
+- commits back `history_snapshots.safe.json` and `listing_seen.safe.json` so trend history and `days seen` persist across daily runs
 
 ### Local static build
 You can test the Pages build locally:
@@ -54,6 +55,7 @@ Generated output:
 - `site/data/listings.csv`
 - `site/data/history_snapshots.safe.json`
 - `history_snapshots.safe.json`
+- `listing_seen.safe.json`
 
 ## Configure MarketCheck endpoints
 This repo does **not** hardcode endpoint paths. Set them after confirming MarketCheck docs.
@@ -121,6 +123,7 @@ python scripts/history_portability.py export --state MA --out history_snapshots.
 ```
 
 `history_snapshots.safe.json` is safe to commit to GitHub.
+`listing_seen.safe.json` is also safe to commit to GitHub. It stores only hashed listing identities plus first/last seen timestamps, not raw VINs, listing URLs, or API secrets.
 
 ## Availability behavior
 Listings that disappear from MarketCheck are marked unavailable after the next successful refresh.

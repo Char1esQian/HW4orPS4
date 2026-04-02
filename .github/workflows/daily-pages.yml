@@ -52,12 +52,12 @@ jobs:
           MARKETCHECK_TOTAL_PAGES_KEY: ""
         run: python scripts/build_pages_site.py
 
-      - name: Commit safe history snapshots
+      - name: Commit safe Pages state
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add history_snapshots.safe.json
-          git diff --cached --quiet || git commit -m "chore: update safe history snapshots"
+          git add history_snapshots.safe.json listing_seen.safe.json
+          git diff --cached --quiet || git commit -m "chore: update safe Pages state"
           git push
 
       - name: Configure Pages

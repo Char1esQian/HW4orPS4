@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import io
 import json
 from datetime import datetime
@@ -13,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.ingestion import (
     ListingFilters,
+    build_fingerprint,
     describe_filter_conditions,
     export_filter_snapshot_payload,
     query_filter_snapshot_history,
@@ -24,6 +26,7 @@ from app.ingestion import (
 from app.models import Listing, RunLog, utcnow
 
 DEFAULT_MAX_MILES = 40000
+LISTING_SEEN_EXPORT_SCHEMA = "hw4finder.listing_seen.v1"
 
 
 def build_default_filters(default_state: str) -> ListingFilters:
@@ -38,6 +41,95 @@ def _days_seen(first_seen: datetime | None) -> int | None:
         return None
     delta = utcnow().date() - first_seen.date()
     return max(0, delta.days)
+
+
+def _listing_seen_identity(row: Listing) -> str:
+    if row.vin:
+        base = f"vin|{row.vin}"
+    elif row.url:
+        base = f"url|{row.source}|{row.url}"
+    else:
+        raw = row.raw if isinstance(row.raw, dict) else {}
+        heading = raw.get("heading")
+        fingerprint = row.fingerprint or build_fingerprint(row.source, heading, row.price, row.city)
+        base = f"fingerprint|{row.source}|{fingerprint}"
+    return hashlib.sha256(base.encode("utf-8")).hexdigest()
+
+
+def import_listing_seen_payload(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    if payload.get("schema") != LISTING_SEEN_EXPORT_SCHEMA:
+        raise ValueError("Unsupported listing seen payload schema.")
+
+    entries: dict[str, dict[str, Any]] = {}
+    for item in payload.get("listings", []):
+        if not isinstance(item, dict):
+            continue
+        identity = str(item.get("identity") or "").strip()
+        if not identity:
+            continue
+        first_seen_raw = item.get("first_seen")
+        last_seen_raw = item.get("last_seen")
+        try:
+            first_seen = (
+                datetime.fromisoformat(str(first_seen_raw)) if first_seen_raw else None
+            )
+        except ValueError:
+            first_seen = None
+        try:
+            last_seen = datetime.fromisoformat(str(last_seen_raw)) if last_seen_raw else None
+        except ValueError:
+            last_seen = None
+        entries[identity] = {
+            "first_seen": first_seen,
+            "last_seen": last_seen,
+            "is_available": bool(item.get("is_available", False)),
+        }
+    return entries
+
+
+def merge_listing_seen_history(
+    session: Session,
+    persisted_entries: dict[str, dict[str, Any]],
+) -> int:
+    updated = 0
+    rows = list(session.execute(select(Listing)).scalars().all())
+    for row in rows:
+        entry = persisted_entries.get(_listing_seen_identity(row))
+        if not entry:
+            continue
+        prior_first_seen = entry.get("first_seen")
+        if isinstance(prior_first_seen, datetime) and prior_first_seen < row.first_seen:
+            row.first_seen = prior_first_seen
+            updated += 1
+        prior_last_seen = entry.get("last_seen")
+        if isinstance(prior_last_seen, datetime) and prior_last_seen > row.last_seen:
+            row.last_seen = prior_last_seen
+            updated += 1
+    if updated:
+        session.commit()
+    return updated
+
+
+def export_listing_seen_payload(session: Session) -> dict[str, Any]:
+    rows = list(
+        session.execute(
+            select(Listing).where(Listing.source == "marketcheck").order_by(Listing.first_seen.asc())
+        ).scalars()
+    )
+    return {
+        "schema": LISTING_SEEN_EXPORT_SCHEMA,
+        "exported_at": utcnow().isoformat(),
+        "count": len(rows),
+        "listings": [
+            {
+                "identity": _listing_seen_identity(row),
+                "first_seen": row.first_seen.isoformat() if row.first_seen else None,
+                "last_seen": row.last_seen.isoformat() if row.last_seen else None,
+                "is_available": bool(row.is_available),
+            }
+            for row in rows
+        ],
+    }
 
 
 def _safe_raw_subset(row: Listing) -> dict[str, Any]:
