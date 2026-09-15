@@ -128,6 +128,23 @@
         background: linear-gradient(180deg, var(--accent), var(--accent-strong));
         color: #fff;
       }
+      .corner-photo {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 40;
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        object-fit: cover;
+        object-position: 55% 22%;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
+        transition: transform 160ms ease;
+      }
+      .corner-photo:hover {
+        transform: scale(1.08) rotate(-3deg);
+      }
       .hero-top {
         display: flex;
         justify-content: space-between;
@@ -650,10 +667,19 @@
         .title {
           font-size: 28px;
         }
+        .corner-photo {
+          width: 64px;
+          height: 64px;
+          right: 12px;
+          bottom: 12px;
+        }
       }
     </style>
   </head>
   <body>
+    {% if corner_photo_url %}
+    <img class="corner-photo" src="{{ corner_photo_url }}" alt="A Shiba Inu standing on its hind legs" title="Quality control" loading="lazy" />
+    {% endif %}
     <nav class="page-jump-nav" aria-label="Page sections">
       <div class="page-jump-title">Jump To</div>
       <a class="page-jump-link" href="#top" data-nav-target="top">Top</a>

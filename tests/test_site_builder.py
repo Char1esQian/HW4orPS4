@@ -84,3 +84,41 @@ def test_site_tab_links_are_relative_to_active_tab() -> None:
     assert [(t["href"], t["active"]) for t in from_root] == [("./", True), ("./new-jersey/", False)]
     from_nj = _site_tab_links(tabs, tabs[1])
     assert [(t["href"], t["active"]) for t in from_nj] == [("../", False), ("../new-jersey/", True)]
+
+
+def test_corner_photo_is_copied_into_each_tab_when_present(tmp_path, monkeypatch) -> None:
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from sqlalchemy.pool import StaticPool
+
+    import app.site_builder as sb
+    from app.models import Base
+
+    engine = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+        future=True,
+    )
+    Base.metadata.create_all(engine)
+    session = sessionmaker(bind=engine, future=True)()
+
+    photo = tmp_path / "dog.jpg"
+    photo.write_bytes(b"\xff\xd8\xff\xd9")
+    monkeypatch.setattr(sb, "CORNER_PHOTO_SOURCE", photo)
+
+    tabs = sb.parse_pages_tabs("Massachusetts=MA;New Jersey=NJ")
+    out = tmp_path / "site"
+    for tab in tabs:
+        tab_dir = out / tab.slug if tab.slug else out
+        payload = sb.write_site_payload_files(
+            session, output_dir=tab_dir, default_state=tab.states, tabs=tabs, active_tab=tab
+        )
+        assert payload["corner_photo_url"] == "./dog.jpg"
+        assert (tab_dir / "dog.jpg").read_bytes() == photo.read_bytes()
+        assert 'class="corner-photo"' in (tab_dir / "index.html").read_text(encoding="utf-8")
+
+    monkeypatch.setattr(sb, "CORNER_PHOTO_SOURCE", tmp_path / "missing.jpg")
+    payload = sb.write_site_payload_files(session, output_dir=tmp_path / "plain", default_state="MA")
+    assert payload["corner_photo_url"] is None
+    assert "corner-photo\"" not in (tmp_path / "plain" / "index.html").read_text(encoding="utf-8").split("</style>")[1]

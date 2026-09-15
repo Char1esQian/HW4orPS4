@@ -5,6 +5,7 @@ import hashlib
 import io
 import json
 import re
+import shutil
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -30,6 +31,8 @@ from app.models import Listing, RunLog, utcnow
 
 DEFAULT_MAX_MILES = 40000
 LISTING_SEEN_EXPORT_SCHEMA = "hw4finder.listing_seen.v1"
+# Optional photo shown in the corner of every hosted page (just because).
+CORNER_PHOTO_SOURCE = Path(__file__).resolve().parent / "assets" / "dog.jpg"
 
 
 @dataclass(frozen=True)
@@ -281,6 +284,7 @@ def build_site_payload(session: Session, default_state: str) -> dict[str, Any]:
     return {
         "static_mode": True,
         "site_tabs": [],
+        "corner_photo_url": None,
         "generated_at": utcnow().isoformat(),
         "filters": filters,
         "history_filter_description": describe_filter_conditions(filters),
@@ -341,6 +345,10 @@ def write_site_payload_files(
     payload = build_site_payload(session, default_state)
     if tabs and active_tab is not None and len(tabs) > 1:
         payload["site_tabs"] = _site_tab_links(tabs, active_tab)
+    if CORNER_PHOTO_SOURCE.exists():
+        output_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(CORNER_PHOTO_SOURCE, output_dir / CORNER_PHOTO_SOURCE.name)
+        payload["corner_photo_url"] = f"./{CORNER_PHOTO_SOURCE.name}"
     data_dir = output_dir / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
     json_model_y_results = payload["json_model_y_results"]
