@@ -4,6 +4,8 @@ import csv
 import hashlib
 import io
 import json
+import re
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -12,6 +14,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.config import normalize_state_scope
 from app.ingestion import (
     ListingFilters,
     build_fingerprint,
@@ -29,9 +32,48 @@ DEFAULT_MAX_MILES = 40000
 LISTING_SEEN_EXPORT_SCHEMA = "hw4finder.listing_seen.v1"
 
 
+@dataclass(frozen=True)
+class PagesTab:
+    label: str
+    states: str  # normalized state scope, e.g. "NJ,NY,PA"
+    slug: str  # "" for the tab built at the site root
+
+
+def parse_pages_tabs(value: str | None) -> list[PagesTab]:
+    """Parse PAGES_TABS such as "Massachusetts=MA;New Jersey=NJ,NY,PA".
+
+    The first tab is built at the site root; every later tab is built into a
+    sub-folder named after its label (e.g. site/new-jersey/).
+    """
+    tabs: list[PagesTab] = []
+    for chunk in (value or "").split(";"):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        label, sep, states = chunk.partition("=")
+        label = label.strip()
+        if not sep or not label or not states.strip():
+            raise ValueError(f"PAGES_TABS entry must look like 'Label=ST,ST': {chunk!r}")
+        slug = "" if not tabs else re.sub(r"[^a-z0-9]+", "-", label.lower()).strip("-")
+        tabs.append(PagesTab(label=label, states=normalize_state_scope(states), slug=slug))
+    return tabs
+
+
+def _site_tab_links(tabs: list[PagesTab], active: PagesTab) -> list[dict[str, Any]]:
+    prefix = "../" if active.slug else "./"
+    return [
+        {
+            "label": tab.label,
+            "href": f"{prefix}{tab.slug}/" if tab.slug else prefix,
+            "active": tab.slug == active.slug,
+        }
+        for tab in tabs
+    ]
+
+
 def build_default_filters(default_state: str) -> ListingFilters:
     return ListingFilters(
-        state=(default_state or "MA").upper(),
+        state=normalize_state_scope(default_state, default="MA"),
         max_miles=DEFAULT_MAX_MILES,
     )
 
@@ -238,6 +280,7 @@ def build_site_payload(session: Session, default_state: str) -> dict[str, Any]:
 
     return {
         "static_mode": True,
+        "site_tabs": [],
         "generated_at": utcnow().isoformat(),
         "filters": filters,
         "history_filter_description": describe_filter_conditions(filters),
@@ -292,8 +335,12 @@ def write_site_payload_files(
     session: Session,
     output_dir: Path,
     default_state: str,
+    tabs: list[PagesTab] | None = None,
+    active_tab: PagesTab | None = None,
 ) -> dict[str, Any]:
     payload = build_site_payload(session, default_state)
+    if tabs and active_tab is not None and len(tabs) > 1:
+        payload["site_tabs"] = _site_tab_links(tabs, active_tab)
     data_dir = output_dir / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
     json_model_y_results = payload["json_model_y_results"]

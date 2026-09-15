@@ -1,9 +1,34 @@
 # HW4 Finder
 
 Minimal local app to ingest Tesla listings from MarketCheck, store in SQLite, and show:
-- Model Y in MA that are likely HW4 using VIN thresholds
-- Model 3 in MA with year >= 2024
+- Model Y in the configured state(s) that are likely HW4 using VIN thresholds
+- Model 3 in the configured state(s) with year >= 2024
 - Only currently available listings from the latest successful refresh
+
+## Choosing which state(s) to search
+`DEFAULT_STATE` accepts one state code or a comma-separated list:
+- `DEFAULT_STATE=MA` — statewide search (e.g. to qualify for a state rebate)
+- `DEFAULT_STATE=NJ,NY,PA` — search several neighbouring states at once if you're willing to drive
+
+Each state is fetched from MarketCheck separately, so a 3-state scope uses roughly 3x the API calls of
+a single state. Trend history is keyed by the sorted set of states, so `NY,NJ` and `NJ,NY` share history,
+but a scope's history starts fresh the first time it is used. The local web UI's **State(s)** box accepts
+the same format.
+
+### Multiple tabs on the hosted site
+The GitHub Pages build can publish one page per region, with a tab bar linking between them. Set
+`PAGES_TABS` in `.github/workflows/daily-pages.yml`:
+
+```yaml
+PAGES_TABS: "Massachusetts=MA;New Jersey=NJ,NY,PA"
+```
+
+- Entries are `Label=STATES`, separated by `;`.
+- The first tab is built at the site root (the existing URL keeps working).
+- Each later tab is built into a sub-folder named after its label, e.g. `.../new-jersey/`, which can be
+  bookmarked directly.
+- MarketCheck is refreshed once for the union of all tabs' states, so the API key and database are shared.
+- If `PAGES_TABS` is unset, the site is a single page for `DEFAULT_STATE`.
 
 ## Stack
 - Python 3.11+
@@ -50,7 +75,7 @@ python scripts/build_pages_site.py
 ```
 
 Generated output:
-- `site/index.html`
+- `site/index.html` (plus `site/<tab-slug>/index.html` for each extra `PAGES_TABS` entry)
 - `site/data/listings.json`
 - `site/data/listings.csv`
 - `site/data/history_snapshots.safe.json`

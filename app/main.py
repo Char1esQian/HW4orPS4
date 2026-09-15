@@ -11,7 +11,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.config import get_settings
+from app.config import get_settings, normalize_state_scope
 from app.database import get_db, init_db
 from app.ingestion import (
     ListingFilters,
@@ -53,7 +53,7 @@ def _build_filters(
     one_owner_values: tuple[str, ...] = (),
 ) -> ListingFilters:
     return ListingFilters(
-        state=(state or settings_state).upper(),
+        state=normalize_state_scope(state, default=settings_state),
         min_price=min_price,
         max_price=max_price,
         min_miles=min_miles,

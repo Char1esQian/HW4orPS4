@@ -13,7 +13,7 @@ import requests
 from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
 
-from app.config import get_settings
+from app.config import get_settings, normalize_state_scope, parse_state_scope
 from app.hw4 import is_hw4_likely_model_y, normalize_vin
 from app.marketcheck import MarketCheckClient
 from app.models import FilterSnapshot, Listing, RunLog, utcnow
@@ -455,7 +455,7 @@ def mark_unavailable_listings(
 ) -> int:
     stmt = select(Listing).where(
         Listing.source == source,
-        Listing.state == state.upper(),
+        Listing.state.in_(parse_state_scope(state)),
         Listing.model.in_(models),
         Listing.is_available.is_(True),
         Listing.last_seen < cutoff_started_at,
@@ -488,9 +488,10 @@ def refresh_marketcheck(
     session.add(run)
     session.commit()
 
+    scope = normalize_state_scope(state, default=settings.default_state)
     try:
         listings = fetch_marketcheck_listings(
-            state=(state or settings.default_state).upper(),
+            state=scope,
             make="Tesla",
             models=["Model 3", "Model Y"],
             extra_filters=extra_filters,
@@ -505,7 +506,7 @@ def refresh_marketcheck(
         upserted = upsert_listings(session, adapted)
         mark_unavailable_listings(
             session,
-            state=(state or settings.default_state).upper(),
+            state=scope,
             cutoff_started_at=run.started_at,
         )
         run.status = "success"
@@ -583,7 +584,7 @@ def _normalized_filter_values(values: tuple[str, ...]) -> tuple[str, ...]:
 
 def _filter_signature(filters: "ListingFilters") -> str:
     payload = {
-        "state": filters.state.upper(),
+        "state": normalize_state_scope(filters.state),
         "min_price": filters.min_price,
         "max_price": filters.max_price,
         "min_miles": filters.min_miles,
@@ -599,7 +600,7 @@ def _filter_signature(filters: "ListingFilters") -> str:
 
 
 def describe_filter_conditions(filters: "ListingFilters") -> str:
-    parts = [f"state={filters.state.upper()}"]
+    parts = [f"state={normalize_state_scope(filters.state)}"]
     if filters.min_price is not None:
         parts.append(f"min_price={filters.min_price}")
     if filters.max_price is not None:
@@ -682,7 +683,7 @@ def track_filter_snapshot(
         snapshot_date=snapshot_date,
         filter_signature=signature,
         filter_description=describe_filter_conditions(filters),
-        state=filters.state.upper(),
+        state=normalize_state_scope(filters.state),
         min_price=filters.min_price,
         max_price=filters.max_price,
         min_miles=filters.min_miles,
@@ -754,7 +755,7 @@ def export_filter_snapshot_payload(
 ) -> dict[str, Any]:
     stmt = select(FilterSnapshot)
     if state:
-        stmt = stmt.where(FilterSnapshot.state == state.strip().upper())
+        stmt = stmt.where(FilterSnapshot.state == normalize_state_scope(state))
     stmt = stmt.order_by(FilterSnapshot.snapshot_date.asc(), FilterSnapshot.filter_signature.asc())
     rows = list(session.execute(stmt).scalars().all())
     snapshots = [_snapshot_to_safe_dict(row) for row in rows]
@@ -803,7 +804,7 @@ def _snapshot_signature_from_entry(entry: dict[str, Any]) -> str:
         return signature
 
     filters = ListingFilters(
-        state=str(entry.get("state") or "").strip().upper() or "MA",
+        state=normalize_state_scope(str(entry.get("state") or ""), default="MA"),
         min_price=_parse_snapshot_int(entry.get("min_price")),
         max_price=_parse_snapshot_int(entry.get("max_price")),
         min_miles=_parse_snapshot_int(entry.get("min_miles")),
@@ -933,7 +934,7 @@ class ListingFilters:
 
 
 def _apply_common_filters(stmt, filters: ListingFilters):
-    stmt = stmt.where(Listing.state == filters.state.upper())
+    stmt = stmt.where(Listing.state.in_(parse_state_scope(filters.state)))
 
     if filters.min_price is not None:
         stmt = stmt.where(Listing.price.is_not(None), Listing.price >= filters.min_price)

@@ -88,7 +88,7 @@ class FilterSnapshot(Base):
     snapshot_date: Mapped[date] = mapped_column(Date, nullable=False)
     filter_signature: Mapped[str] = mapped_column(String(64), nullable=False)
     filter_description: Mapped[str] = mapped_column(Text, nullable=False)
-    state: Mapped[str | None] = mapped_column(String(2), nullable=True)
+    state: Mapped[str | None] = mapped_column(String(64), nullable=True)
     min_price: Mapped[int | None] = mapped_column(Integer, nullable=True)
     max_price: Mapped[int | None] = mapped_column(Integer, nullable=True)
     min_miles: Mapped[int | None] = mapped_column(Integer, nullable=True)

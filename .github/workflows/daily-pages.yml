@@ -38,6 +38,9 @@ jobs:
         env:
           MARKETCHECK_API_KEY: ${{ secrets.MARKETCHECK_API_KEY }}
           MARKETCHECK_BASE_URL: https://api.marketcheck.com
+          # One page per tab: "Label=STATES;Label=STATES". The first tab is the site root.
+          PAGES_TABS: "Massachusetts=MA;New Jersey=NJ,NY,PA"
+          # Fallback scope when PAGES_TABS is unset (single-page site).
           DEFAULT_STATE: MA
           DATABASE_URL: sqlite:///./hw4finder.db
           MARKETCHECK_SEARCH_ENDPOINT: /v2/search/car/active

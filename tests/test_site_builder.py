@@ -51,3 +51,36 @@ def test_serialize_listing_safe_omits_raw_payload() -> None:
     assert payload["days_seen"] is not None
     assert "raw" not in payload
     assert "secret" not in str(payload)
+
+
+def test_parse_pages_tabs_root_first_then_slugged_subfolders() -> None:
+    from app.site_builder import PagesTab, parse_pages_tabs
+
+    tabs = parse_pages_tabs("Massachusetts=MA; New Jersey = pa,nj,ny ;")
+    assert tabs == [
+        PagesTab(label="Massachusetts", states="MA", slug=""),
+        PagesTab(label="New Jersey", states="NJ,NY,PA", slug="new-jersey"),
+    ]
+    assert parse_pages_tabs(None) == []
+    assert parse_pages_tabs("") == []
+
+
+def test_parse_pages_tabs_rejects_malformed_entries() -> None:
+    import pytest
+
+    from app.site_builder import parse_pages_tabs
+
+    with pytest.raises(ValueError):
+        parse_pages_tabs("Massachusetts")
+    with pytest.raises(ValueError):
+        parse_pages_tabs("=MA")
+
+
+def test_site_tab_links_are_relative_to_active_tab() -> None:
+    from app.site_builder import _site_tab_links, parse_pages_tabs
+
+    tabs = parse_pages_tabs("Massachusetts=MA;New Jersey=NJ,NY,PA")
+    from_root = _site_tab_links(tabs, tabs[0])
+    assert [(t["href"], t["active"]) for t in from_root] == [("./", True), ("./new-jersey/", False)]
+    from_nj = _site_tab_links(tabs, tabs[1])
+    assert [(t["href"], t["active"]) for t in from_nj] == [("../", False), ("../new-jersey/", True)]

@@ -103,6 +103,31 @@
         padding: 18px;
         box-shadow: var(--hero-shadow);
       }
+      .site-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+      .site-tab {
+        padding: 8px 18px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .site-tab:hover {
+        border-color: var(--accent);
+        color: var(--accent-strong);
+      }
+      .site-tab.active {
+        border-color: var(--accent);
+        background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+        color: #fff;
+      }
       .hero-top {
         display: flex;
         justify-content: space-between;
@@ -640,6 +665,13 @@
     </nav>
     <main class="container">
       <section id="top" class="hero">
+        {% if site_tabs %}
+        <nav class="site-tabs" aria-label="Regions">
+          {% for tab in site_tabs %}
+          <a class="site-tab{% if tab.active %} active{% endif %}" href="{{ tab.href }}"{% if tab.active %} aria-current="page"{% endif %}>{{ tab.label }}</a>
+          {% endfor %}
+        </nav>
+        {% endif %}
         <div class="hero-top">
           <div class="brand-row">
             <div class="brand-mark" aria-hidden="true">
@@ -721,7 +753,7 @@
           method="get"
           action="{% if static_mode %}#filters{% else %}/{% endif %}"
         >
-          <label>State <input type="text" name="state" value="{{ filters.state }}" maxlength="2" /></label>
+          <label>State(s) <input type="text" name="state" value="{{ filters.state }}" placeholder="NJ,NY,PA" /></label>
           <label>Min Price <input type="number" name="min_price" value="{{ filters.min_price or '' }}" /></label>
           <label>Max Price <input type="number" name="max_price" value="{{ filters.max_price or '' }}" /></label>
           <label>Min Miles <input type="number" name="min_miles" value="{{ filters.min_miles or '' }}" /></label>

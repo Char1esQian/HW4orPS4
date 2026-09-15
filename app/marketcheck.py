@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 
 import requests
 
-from app.config import Settings
+from app.config import Settings, parse_state_scope
 
 
 class MarketCheckError(RuntimeError):
@@ -125,7 +125,28 @@ class MarketCheckClient:
         models: list[str] | None = None,
         extra_filters: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
+        """Fetch listings for a state scope such as "MA" or "NJ,NY,PA".
+
+        Each state is paginated separately so the per-state page cap and
+        stop conditions behave the same as a single-state search.
+        """
         models = models or ["Model 3", "Model Y"]
+        all_items: list[dict[str, Any]] = []
+        for state_code in parse_state_scope(state) or ("MA",):
+            all_items.extend(
+                self._fetch_state_listings(
+                    state=state_code, make=make, models=models, extra_filters=extra_filters
+                )
+            )
+        return all_items
+
+    def _fetch_state_listings(
+        self,
+        state: str,
+        make: str,
+        models: list[str],
+        extra_filters: dict[str, Any] | None,
+    ) -> list[dict[str, Any]]:
         page_size = self.settings.marketcheck_page_size
         all_items: list[dict[str, Any]] = []
         page_param_name = self.settings.page_param

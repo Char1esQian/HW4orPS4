@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app.config import get_settings
+from app.config import get_settings, parse_state_scope
 from app.marketcheck import MarketCheckClient
 
 
@@ -35,7 +35,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Make one MarketCheck request, print keys, and write sample_response.json."
     )
-    parser.add_argument("--state", default=None, help="State code (defaults to DEFAULT_STATE)")
+    parser.add_argument(
+        "--state", default=None, help="State code(s), e.g. NJ or NJ,NY (defaults to DEFAULT_STATE)"
+    )
     parser.add_argument("--make", default="Tesla", help="Vehicle make")
     parser.add_argument(
         "--models",
@@ -46,7 +48,8 @@ def main() -> int:
 
     settings = get_settings()
     client = MarketCheckClient(settings)
-    state = (args.state or settings.default_state).upper()
+    # Health check hits a single state; the app itself loops over every state in the scope.
+    state = parse_state_scope(args.state or settings.default_state)[0]
     models = [m.strip() for m in args.models.split(",") if m.strip()]
     page_param_value = 1
     if settings.page_param.strip().lower() in {"start", "offset"}:

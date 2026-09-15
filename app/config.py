@@ -27,6 +27,28 @@ def _as_int(value: str | None, default: int) -> int:
         return default
 
 
+def parse_state_scope(value: str | None) -> tuple[str, ...]:
+    """Split a state scope like "nj, ny,pa" into ("NJ", "NY", "PA").
+
+    Sorted and de-duplicated so the same set of states always yields the same
+    scope regardless of how it was typed. A single state is returned unchanged.
+    """
+    if not value:
+        return ()
+    codes: set[str] = set()
+    for part in str(value).split(","):
+        code = part.strip().upper()
+        if code:
+            codes.add(code)
+    return tuple(sorted(codes))
+
+
+def normalize_state_scope(value: str | None, default: str = "MA") -> str:
+    """Canonical comma-joined form of a state scope, e.g. "NJ,NY,PA"."""
+    states = parse_state_scope(value) or parse_state_scope(default)
+    return ",".join(states)
+
+
 def _load_endpoints(path: Path) -> dict[str, str]:
     if not path.exists():
         return {}
@@ -84,7 +106,7 @@ def get_settings() -> Settings:
     return Settings(
         marketcheck_api_key=os.getenv("MARKETCHECK_API_KEY", "").strip(),
         marketcheck_base_url=os.getenv("MARKETCHECK_BASE_URL", "").rstrip("/"),
-        default_state=os.getenv("DEFAULT_STATE", "MA").upper(),
+        default_state=normalize_state_scope(os.getenv("DEFAULT_STATE"), default="MA"),
         database_url=os.getenv("DATABASE_URL", "sqlite:///./hw4finder.db"),
         marketcheck_timeout_seconds=_as_int(
             os.getenv("MARKETCHECK_TIMEOUT_SECONDS"), default=25
