@@ -54,7 +54,10 @@ def main() -> int:
             listing_seen_payload = _read_json_file(listing_seen_path)
             persisted_listing_seen = import_listing_seen_payload(listing_seen_payload)
 
-        refresh_marketcheck(session, state=refresh_scope)
+        run = refresh_marketcheck(session, state=refresh_scope)
+        if run.status != "success":
+            print(f"ERROR: MarketCheck refresh failed: {run.error_text}", file=sys.stderr)
+            return 1
         if persisted_listing_seen:
             merge_listing_seen_history(session, persisted_listing_seen)
         for tab in tabs:

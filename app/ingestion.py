@@ -515,7 +515,8 @@ def refresh_marketcheck(
     except Exception as exc:  # noqa: BLE001
         session.rollback()
         run.status = "failed"
-        run.error_text = str(exc)
+        raw_error = str(exc)
+        run.error_text = re.sub(r"(api_key=)[^& \'\"]+", r"\1[REDACTED]", raw_error)
     finally:
         run.ended_at = utcnow()
         session.add(run)
