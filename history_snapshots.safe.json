@@ -1,7 +1,7 @@
 {
   "schema": "hw4finder.filter_snapshots.v1",
-  "exported_at": "2026-10-16T14:51:10.658287",
-  "count": 232,
+  "exported_at": "2026-10-17T13:43:13.654041",
+  "count": 234,
   "snapshots": [
     {
       "snapshot_date": "2026-02-26",
@@ -27,7 +27,7 @@
       "model_3_price_q1": 32940,
       "model_3_price_median": 35244,
       "model_3_price_q3": 39867,
-      "created_at": "2026-10-16T14:51:04.442717"
+      "created_at": "2026-10-17T13:43:07.218095"
     },
     {
       "snapshot_date": "2026-02-27",
@@ -53,7 +53,7 @@
       "model_3_price_q1": 33990,
       "model_3_price_median": 36990,
       "model_3_price_q3": 39590,
-      "created_at": "2026-10-16T14:51:04.442727"
+      "created_at": "2026-10-17T13:43:07.218104"
     },
     {
       "snapshot_date": "2026-02-28",
@@ -79,7 +79,7 @@
       "model_3_price_q1": 33990,
       "model_3_price_median": 36990,
       "model_3_price_q3": 39590,
-      "created_at": "2026-10-16T14:51:04.442734"
+      "created_at": "2026-10-17T13:43:07.218110"
     },
     {
       "snapshot_date": "2026-03-03",
@@ -105,7 +105,7 @@
       "model_3_price_q1": 33990,
       "model_3_price_median": 36990,
       "model_3_price_q3": 39590,
-      "created_at": "2026-10-16T14:51:04.442744"
+      "created_at": "2026-10-17T13:43:07.218120"
     },
     {
       "snapshot_date": "2026-03-11",
@@ -131,7 +131,7 @@
       "model_3_price_q1": 33944,
       "model_3_price_median": 36990,
       "model_3_price_q3": 39294,
-      "created_at": "2026-10-16T14:51:04.442750"
+      "created_at": "2026-10-17T13:43:07.218125"
     },
     {
       "snapshot_date": "2026-03-19",
@@ -157,7 +157,7 @@
       "model_3_price_q1": 33921,
       "model_3_price_median": 36744,
       "model_3_price_q3": 39442,
-      "created_at": "2026-10-16T14:51:04.442755"
+      "created_at": "2026-10-17T13:43:07.218128"
     },
     {
       "snapshot_date": "2026-03-24",
@@ -183,7 +183,7 @@
       "model_3_price_q1": 33944,
       "model_3_price_median": 36990,
       "model_3_price_q3": 39790,
-      "created_at": "2026-10-16T14:51:04.442759"
+      "created_at": "2026-10-17T13:43:07.218131"
     },
     {
       "snapshot_date": "2026-03-30",
@@ -209,7 +209,7 @@
       "model_3_price_q1": 33967,
       "model_3_price_median": 36990,
       "model_3_price_q3": 40240,
-      "created_at": "2026-10-16T14:51:04.442766"
+      "created_at": "2026-10-17T13:43:07.218138"
     },
     {
       "snapshot_date": "2026-03-31",
@@ -235,7 +235,7 @@
       "model_3_price_q1": 35998,
       "model_3_price_median": 39590,
       "model_3_price_q3": 41990,
-      "created_at": "2026-10-16T14:51:04.442771"
+      "created_at": "2026-10-17T13:43:07.218141"
     },
     {
       "snapshot_date": "2026-04-01",
@@ -261,7 +261,7 @@
       "model_3_price_q1": 36896,
       "model_3_price_median": 40790,
       "model_3_price_q3": 43197,
-      "created_at": "2026-10-16T14:51:04.442775"
+      "created_at": "2026-10-17T13:43:07.218144"
     },
     {
       "snapshot_date": "2026-04-02",
@@ -287,7 +287,7 @@
       "model_3_price_q1": 38046,
       "model_3_price_median": 40490,
       "model_3_price_q3": 42392,
-      "created_at": "2026-10-16T14:51:04.442779"
+      "created_at": "2026-10-17T13:43:07.218147"
     },
     {
       "snapshot_date": "2026-04-03",
@@ -313,7 +313,7 @@
       "model_3_price_q1": 38729,
       "model_3_price_median": 41590,
       "model_3_price_q3": 43599,
-      "created_at": "2026-10-16T14:51:04.442783"
+      "created_at": "2026-10-17T13:43:07.218150"
     },
     {
       "snapshot_date": "2026-04-04",
@@ -339,7 +339,7 @@
       "model_3_price_q1": 38990,
       "model_3_price_median": 41990,
       "model_3_price_q3": 45590,
-      "created_at": "2026-10-16T14:51:04.442787"
+      "created_at": "2026-10-17T13:43:07.218154"
     },
     {
       "snapshot_date": "2026-04-05",
@@ -365,7 +365,7 @@
       "model_3_price_q1": 39390,
       "model_3_price_median": 41790,
       "model_3_price_q3": 45092,
-      "created_at": "2026-10-16T14:51:04.442790"
+      "created_at": "2026-10-17T13:43:07.218157"
     },
     {
       "snapshot_date": "2026-04-06",
@@ -391,7 +391,7 @@
       "model_3_price_q1": 39390,
       "model_3_price_median": 41790,
       "model_3_price_q3": 45092,
-      "created_at": "2026-10-16T14:51:04.442794"
+      "created_at": "2026-10-17T13:43:07.218160"
     },
     {
       "snapshot_date": "2026-04-07",
@@ -417,7 +417,7 @@
       "model_3_price_q1": 38990,
       "model_3_price_median": 41590,
       "model_3_price_q3": 43599,
-      "created_at": "2026-10-16T14:51:04.442798"
+      "created_at": "2026-10-17T13:43:07.218163"
     },
     {
       "snapshot_date": "2026-04-08",
@@ -443,7 +443,7 @@
       "model_3_price_q1": 38246,
       "model_3_price_median": 41090,
       "model_3_price_q3": 45092,
-      "created_at": "2026-10-16T14:51:04.442801"
+      "created_at": "2026-10-17T13:43:07.218166"
     },
     {
       "snapshot_date": "2026-04-09",
@@ -469,7 +469,7 @@
       "model_3_price_q1": 38321,
       "model_3_price_median": 41092,
       "model_3_price_q3": 44097,
-      "created_at": "2026-10-16T14:51:04.442805"
+      "created_at": "2026-10-17T13:43:07.218169"
     },
     {
       "snapshot_date": "2026-04-10",
@@ -495,7 +495,7 @@
       "model_3_price_q1": 38321,
       "model_3_price_median": 41592,
       "model_3_price_q3": 44097,
-      "created_at": "2026-10-16T14:51:04.442809"
+      "created_at": "2026-10-17T13:43:07.218172"
     },
     {
       "snapshot_date": "2026-04-11",
@@ -521,7 +521,7 @@
       "model_3_price_q1": 38321,
       "model_3_price_median": 40792,
       "model_3_price_q3": 43947,
-      "created_at": "2026-10-16T14:51:04.442812"
+      "created_at": "2026-10-17T13:43:07.218175"
     },
     {
       "snapshot_date": "2026-04-12",
@@ -547,7 +547,7 @@
       "model_3_price_q1": 38429,
       "model_3_price_median": 41590,
       "model_3_price_q3": 43599,
-      "created_at": "2026-10-16T14:51:04.442816"
+      "created_at": "2026-10-17T13:43:07.218178"
     },
     {
       "snapshot_date": "2026-04-13",
@@ -573,7 +573,7 @@
       "model_3_price_q1": 38321,
       "model_3_price_median": 40792,
       "model_3_price_q3": 43947,
-      "created_at": "2026-10-16T14:51:04.442819"
+      "created_at": "2026-10-17T13:43:07.218181"
     },
     {
       "snapshot_date": "2026-04-14",
@@ -599,7 +599,7 @@
       "model_3_price_q1": 38321,
       "model_3_price_median": 40792,
       "model_3_price_q3": 43947,
-      "created_at": "2026-10-16T14:51:04.442826"
+      "created_at": "2026-10-17T13:43:07.218184"
     },
     {
       "snapshot_date": "2026-04-15",
@@ -625,7 +625,7 @@
       "model_3_price_q1": 38850,
       "model_3_price_median": 40790,
       "model_3_price_q3": 42392,
-      "created_at": "2026-10-16T14:51:04.442829"
+      "created_at": "2026-10-17T13:43:07.218187"
     },
     {
       "snapshot_date": "2026-04-16",
@@ -651,7 +651,7 @@
       "model_3_price_q1": 39290,
       "model_3_price_median": 39990,
       "model_3_price_q3": 41792,
-      "created_at": "2026-10-16T14:51:04.442833"
+      "created_at": "2026-10-17T13:43:07.218190"
     },
     {
       "snapshot_date": "2026-04-17",
@@ -677,7 +677,7 @@
       "model_3_price_q1": 39140,
       "model_3_price_median": 39990,
       "model_3_price_q3": 41891,
-      "created_at": "2026-10-16T14:51:04.442836"
+      "created_at": "2026-10-17T13:43:07.218193"
     },
     {
       "snapshot_date": "2026-04-18",
@@ -703,7 +703,7 @@
       "model_3_price_q1": 39290,
       "model_3_price_median": 39990,
       "model_3_price_q3": 43290,
-      "created_at": "2026-10-16T14:51:04.442840"
+      "created_at": "2026-10-17T13:43:07.218196"
     },
     {
       "snapshot_date": "2026-04-19",
@@ -729,7 +729,7 @@
       "model_3_price_q1": 39290,
       "model_3_price_median": 39990,
       "model_3_price_q3": 43092,
-      "created_at": "2026-10-16T14:51:04.442843"
+      "created_at": "2026-10-17T13:43:07.218199"
     },
     {
       "snapshot_date": "2026-04-20",
@@ -755,7 +755,7 @@
       "model_3_price_q1": 39290,
       "model_3_price_median": 39990,
       "model_3_price_q3": 43092,
-      "created_at": "2026-10-16T14:51:04.442847"
+      "created_at": "2026-10-17T13:43:07.218202"
     },
     {
       "snapshot_date": "2026-04-21",
@@ -781,7 +781,7 @@
       "model_3_price_q1": 39290,
       "model_3_price_median": 39990,
       "model_3_price_q3": 43092,
-      "created_at": "2026-10-16T14:51:04.442850"
+      "created_at": "2026-10-17T13:43:07.218205"
     },
     {
       "snapshot_date": "2026-04-22",
@@ -807,7 +807,7 @@
       "model_3_price_q1": 39290,
       "model_3_price_median": 39990,
       "model_3_price_q3": 43092,
-      "created_at": "2026-10-16T14:51:04.442854"
+      "created_at": "2026-10-17T13:43:07.218208"
     },
     {
       "snapshot_date": "2026-04-23",
@@ -833,7 +833,7 @@
       "model_3_price_q1": 39290,
       "model_3_price_median": 39590,
       "model_3_price_q3": 42792,
-      "created_at": "2026-10-16T14:51:04.442857"
+      "created_at": "2026-10-17T13:43:07.218211"
     },
     {
       "snapshot_date": "2026-04-24",
@@ -859,7 +859,7 @@
       "model_3_price_q1": 39290,
       "model_3_price_median": 39590,
       "model_3_price_q3": 42792,
-      "created_at": "2026-10-16T14:51:04.442861"
+      "created_at": "2026-10-17T13:43:07.218213"
     },
     {
       "snapshot_date": "2026-04-25",
@@ -885,7 +885,7 @@
       "model_3_price_q1": 39290,
       "model_3_price_median": 40990,
       "model_3_price_q3": 42984,
-      "created_at": "2026-10-16T14:51:04.442865"
+      "created_at": "2026-10-17T13:43:07.218216"
     },
     {
       "snapshot_date": "2026-04-26",
@@ -911,7 +911,7 @@
       "model_3_price_q1": 38990,
       "model_3_price_median": 40990,
       "model_3_price_q3": 43990,
-      "created_at": "2026-10-16T14:51:04.442868"
+      "created_at": "2026-10-17T13:43:07.218219"
     },
     {
       "snapshot_date": "2026-04-27",
@@ -937,7 +937,7 @@
       "model_3_price_q1": 38990,
       "model_3_price_median": 40990,
       "model_3_price_q3": 42792,
-      "created_at": "2026-10-16T14:51:04.442872"
+      "created_at": "2026-10-17T13:43:07.218222"
     },
     {
       "snapshot_date": "2026-04-28",
@@ -963,7 +963,7 @@
       "model_3_price_q1": 38990,
       "model_3_price_median": 40531,
       "model_3_price_q3": 42192,
-      "created_at": "2026-10-16T14:51:04.442875"
+      "created_at": "2026-10-17T13:43:07.218225"
     },
     {
       "snapshot_date": "2026-04-29",
@@ -989,7 +989,7 @@
       "model_3_price_q1": 38990,
       "model_3_price_median": 40531,
       "model_3_price_q3": 42192,
-      "created_at": "2026-10-16T14:51:04.442879"
+      "created_at": "2026-10-17T13:43:07.218228"
     },
     {
       "snapshot_date": "2026-04-30",
@@ -1015,7 +1015,7 @@
       "model_3_price_q1": 38990,
       "model_3_price_median": 40587,
       "model_3_price_q3": 41977,
-      "created_at": "2026-10-16T14:51:04.442882"
+      "created_at": "2026-10-17T13:43:07.218231"
     },
     {
       "snapshot_date": "2026-05-01",
@@ -1041,7 +1041,7 @@
       "model_3_price_q1": 36664,
       "model_3_price_median": 39831,
       "model_3_price_q3": 41440,
-      "created_at": "2026-10-16T14:51:04.442886"
+      "created_at": "2026-10-17T13:43:07.218234"
     },
     {
       "snapshot_date": "2026-05-02",
@@ -1067,7 +1067,7 @@
       "model_3_price_q1": 36494,
       "model_3_price_median": 40587,
       "model_3_price_q3": 43294,
-      "created_at": "2026-10-16T14:51:04.442890"
+      "created_at": "2026-10-17T13:43:07.218236"
     },
     {
       "snapshot_date": "2026-05-03",
@@ -1093,7 +1093,7 @@
       "model_3_price_q1": 35246,
       "model_3_price_median": 40588,
       "model_3_price_q3": 43442,
-      "created_at": "2026-10-16T14:51:04.442893"
+      "created_at": "2026-10-17T13:43:07.218239"
     },
     {
       "snapshot_date": "2026-05-04",
@@ -1119,7 +1119,7 @@
       "model_3_price_q1": 33998,
       "model_3_price_median": 40587,
       "model_3_price_q3": 43590,
-      "created_at": "2026-10-16T14:51:04.442897"
+      "created_at": "2026-10-17T13:43:07.218242"
     },
     {
       "snapshot_date": "2026-05-05",
@@ -1145,7 +1145,7 @@
       "model_3_price_q1": 38590,
       "model_3_price_median": 40590,
       "model_3_price_q3": 43590,
-      "created_at": "2026-10-16T14:51:04.442900"
+      "created_at": "2026-10-17T13:43:07.218245"
     },
     {
       "snapshot_date": "2026-05-06",
@@ -1171,7 +1171,7 @@
       "model_3_price_q1": 38690,
       "model_3_price_median": 40588,
       "model_3_price_q3": 43442,
-      "created_at": "2026-10-16T14:51:04.442904"
+      "created_at": "2026-10-17T13:43:07.218248"
     },
     {
       "snapshot_date": "2026-05-07",
@@ -1197,7 +1197,7 @@
       "model_3_price_q1": 38690,
       "model_3_price_median": 40588,
       "model_3_price_q3": 42996,
-      "created_at": "2026-10-16T14:51:04.442907"
+      "created_at": "2026-10-17T13:43:07.218251"
     },
     {
       "snapshot_date": "2026-05-08",
@@ -1223,7 +1223,7 @@
       "model_3_price_q1": 38690,
       "model_3_price_median": 40588,
       "model_3_price_q3": 42996,
-      "created_at": "2026-10-16T14:51:04.442911"
+      "created_at": "2026-10-17T13:43:07.218254"
     },
     {
       "snapshot_date": "2026-05-09",
@@ -1249,7 +1249,7 @@
       "model_3_price_q1": 38590,
       "model_3_price_median": 41245,
       "model_3_price_q3": 42998,
-      "created_at": "2026-10-16T14:51:04.442914"
+      "created_at": "2026-10-17T13:43:07.218257"
     },
     {
       "snapshot_date": "2026-05-10",
@@ -1275,7 +1275,7 @@
       "model_3_price_q1": 38936,
       "model_3_price_median": 40918,
       "model_3_price_q3": 42996,
-      "created_at": "2026-10-16T14:51:04.442918"
+      "created_at": "2026-10-17T13:43:07.218259"
     },
     {
       "snapshot_date": "2026-05-11",
@@ -1301,7 +1301,7 @@
       "model_3_price_q1": 35544,
       "model_3_price_median": 41418,
       "model_3_price_q3": 42996,
-      "created_at": "2026-10-16T14:51:04.442921"
+      "created_at": "2026-10-17T13:43:07.218262"
     },
     {
       "snapshot_date": "2026-05-12",
@@ -1327,7 +1327,7 @@
       "model_3_price_q1": 34396,
       "model_3_price_median": 40280,
       "model_3_price_q3": 41942,
-      "created_at": "2026-10-16T14:51:04.442925"
+      "created_at": "2026-10-17T13:43:07.218265"
     },
     {
       "snapshot_date": "2026-05-13",
@@ -1353,7 +1353,7 @@
       "model_3_price_q1": 34396,
       "model_3_price_median": 40608,
       "model_3_price_q3": 42992,
-      "created_at": "2026-10-16T14:51:04.442928"
+      "created_at": "2026-10-17T13:43:07.218268"
     },
     {
       "snapshot_date": "2026-05-14",
@@ -1379,7 +1379,7 @@
       "model_3_price_q1": 34131,
       "model_3_price_median": 39281,
       "model_3_price_q3": 42554,
-      "created_at": "2026-10-16T14:51:04.442932"
+      "created_at": "2026-10-17T13:43:07.218271"
     },
     {
       "snapshot_date": "2026-05-15",
@@ -1405,7 +1405,7 @@
       "model_3_price_q1": 35264,
       "model_3_price_median": 39972,
       "model_3_price_q3": 42118,
-      "created_at": "2026-10-16T14:51:04.442935"
+      "created_at": "2026-10-17T13:43:07.218274"
     },
     {
       "snapshot_date": "2026-05-16",
@@ -1431,7 +1431,7 @@
       "model_3_price_q1": 34896,
       "model_3_price_median": 38986,
       "model_3_price_q3": 42254,
-      "created_at": "2026-10-16T14:51:04.442939"
+      "created_at": "2026-10-17T13:43:07.218276"
     },
     {
       "snapshot_date": "2026-05-17",
@@ -1457,7 +1457,7 @@
       "model_3_price_q1": 35264,
       "model_3_price_median": 39972,
       "model_3_price_q3": 41918,
-      "created_at": "2026-10-16T14:51:04.442943"
+      "created_at": "2026-10-17T13:43:07.218280"
     },
     {
       "snapshot_date": "2026-05-18",
@@ -1483,7 +1483,7 @@
       "model_3_price_q1": 34896,
       "model_3_price_median": 38986,
       "model_3_price_q3": 42254,
-      "created_at": "2026-10-16T14:51:04.442946"
+      "created_at": "2026-10-17T13:43:07.218283"
     },
     {
       "snapshot_date": "2026-05-19",
@@ -1509,7 +1509,7 @@
       "model_3_price_q1": 34896,
       "model_3_price_median": 38986,
       "model_3_price_q3": 42254,
-      "created_at": "2026-10-16T14:51:04.442950"
+      "created_at": "2026-10-17T13:43:07.218286"
     },
     {
       "snapshot_date": "2026-05-20",
@@ -1535,7 +1535,7 @@
       "model_3_price_q1": 35498,
       "model_3_price_median": 39728,
       "model_3_price_q3": 41581,
-      "created_at": "2026-10-16T14:51:04.442954"
+      "created_at": "2026-10-17T13:43:07.218288"
     },
     {
       "snapshot_date": "2026-05-21",
@@ -1561,7 +1561,7 @@
       "model_3_price_q1": 34998,
       "model_3_price_median": 39467,
       "model_3_price_q3": 41918,
-      "created_at": "2026-10-16T14:51:04.442957"
+      "created_at": "2026-10-17T13:43:07.218291"
     },
     {
       "snapshot_date": "2026-05-22",
@@ -1587,7 +1587,7 @@
       "model_3_price_q1": 34998,
       "model_3_price_median": 38967,
       "model_3_price_q3": 41918,
-      "created_at": "2026-10-16T14:51:04.442961"
+      "created_at": "2026-10-17T13:43:07.218299"
     },
     {
       "snapshot_date": "2026-05-23",
@@ -1613,7 +1613,7 @@
       "model_3_price_q1": 36374,
       "model_3_price_median": 39478,
       "model_3_price_q3": 41804,
-      "created_at": "2026-10-16T14:51:04.442965"
+      "created_at": "2026-10-17T13:43:07.218302"
     },
     {
       "snapshot_date": "2026-05-24",
@@ -1639,7 +1639,7 @@
       "model_3_price_q1": 36749,
       "model_3_price_median": 38967,
       "model_3_price_q3": 41618,
-      "created_at": "2026-10-16T14:51:04.442968"
+      "created_at": "2026-10-17T13:43:07.218305"
     },
     {
       "snapshot_date": "2026-05-25",
@@ -1665,7 +1665,7 @@
       "model_3_price_q1": 36374,
       "model_3_price_median": 40618,
       "model_3_price_q3": 41987,
-      "created_at": "2026-10-16T14:51:04.442972"
+      "created_at": "2026-10-17T13:43:07.218308"
     },
     {
       "snapshot_date": "2026-05-27",
@@ -1691,7 +1691,7 @@
       "model_3_price_q1": 36749,
       "model_3_price_median": 39482,
       "model_3_price_q3": 41618,
-      "created_at": "2026-10-16T14:51:04.442975"
+      "created_at": "2026-10-17T13:43:07.218311"
     },
     {
       "snapshot_date": "2026-05-28",
@@ -1717,7 +1717,7 @@
       "model_3_price_q1": 36749,
       "model_3_price_median": 39482,
       "model_3_price_q3": 41618,
-      "created_at": "2026-10-16T14:51:04.442981"
+      "created_at": "2026-10-17T13:43:07.218313"
     },
     {
       "snapshot_date": "2026-05-29",
@@ -1743,7 +1743,7 @@
       "model_3_price_q1": 37748,
       "model_3_price_median": 39536,
       "model_3_price_q3": 41987,
-      "created_at": "2026-10-16T14:51:04.442985"
+      "created_at": "2026-10-17T13:43:07.218316"
     },
     {
       "snapshot_date": "2026-05-30",
@@ -1769,7 +1769,7 @@
       "model_3_price_q1": 37500,
       "model_3_price_median": 38490,
       "model_3_price_q3": 39998,
-      "created_at": "2026-10-16T14:51:04.442989"
+      "created_at": "2026-10-17T13:43:07.218319"
     },
     {
       "snapshot_date": "2026-05-31",
@@ -1795,7 +1795,7 @@
       "model_3_price_q1": 37500,
       "model_3_price_median": 38490,
       "model_3_price_q3": 39998,
-      "created_at": "2026-10-16T14:51:04.442992"
+      "created_at": "2026-10-17T13:43:07.218322"
     },
     {
       "snapshot_date": "2026-06-01",
@@ -1821,7 +1821,7 @@
       "model_3_price_q1": 37742,
       "model_3_price_median": 38986,
       "model_3_price_q3": 43742,
-      "created_at": "2026-10-16T14:51:04.442996"
+      "created_at": "2026-10-17T13:43:07.218325"
     },
     {
       "snapshot_date": "2026-06-02",
@@ -1847,7 +1847,7 @@
       "model_3_price_q1": 37500,
       "model_3_price_median": 38490,
       "model_3_price_q3": 39998,
-      "created_at": "2026-10-16T14:51:04.442999"
+      "created_at": "2026-10-17T13:43:07.218328"
     },
     {
       "snapshot_date": "2026-06-03",
@@ -1873,7 +1873,7 @@
       "model_3_price_q1": 36625,
       "model_3_price_median": 38478,
       "model_3_price_q3": 41009,
-      "created_at": "2026-10-16T14:51:04.443034"
+      "created_at": "2026-10-17T13:43:07.218332"
     },
     {
       "snapshot_date": "2026-06-04",
@@ -1899,7 +1899,7 @@
       "model_3_price_q1": 35750,
       "model_3_price_median": 38490,
       "model_3_price_q3": 40730,
-      "created_at": "2026-10-16T14:51:04.443044"
+      "created_at": "2026-10-17T13:43:07.218335"
     },
     {
       "snapshot_date": "2026-06-05",
@@ -1925,7 +1925,7 @@
       "model_3_price_q1": 37500,
       "model_3_price_median": 37999,
       "model_3_price_q3": 39482,
-      "created_at": "2026-10-16T14:51:04.443051"
+      "created_at": "2026-10-17T13:43:07.218338"
     },
     {
       "snapshot_date": "2026-06-06",
@@ -1951,7 +1951,7 @@
       "model_3_price_q1": 36175,
       "model_3_price_median": 37734,
       "model_3_price_q3": 38738,
-      "created_at": "2026-10-16T14:51:04.443059"
+      "created_at": "2026-10-17T13:43:07.218340"
     },
     {
       "snapshot_date": "2026-06-07",
@@ -1977,7 +1977,7 @@
       "model_3_price_q1": 37200,
       "model_3_price_median": 37967,
       "model_3_price_q3": 38986,
-      "created_at": "2026-10-16T14:51:04.443063"
+      "created_at": "2026-10-17T13:43:07.218343"
     },
     {
       "snapshot_date": "2026-06-08",
@@ -2003,7 +2003,7 @@
       "model_3_price_q1": 37500,
       "model_3_price_median": 37967,
       "model_3_price_q3": 38490,
-      "created_at": "2026-10-16T14:51:04.443067"
+      "created_at": "2026-10-17T13:43:07.218346"
     },
     {
       "snapshot_date": "2026-06-09",
@@ -2029,7 +2029,7 @@
       "model_3_price_q1": 37500,
       "model_3_price_median": 37967,
       "model_3_price_q3": 38490,
-      "created_at": "2026-10-16T14:51:04.443070"
+      "created_at": "2026-10-17T13:43:07.218349"
     },
     {
       "snapshot_date": "2026-06-10",
@@ -2055,7 +2055,7 @@
       "model_3_price_q1": 37500,
       "model_3_price_median": 37890,
       "model_3_price_q3": 37967,
-      "created_at": "2026-10-16T14:51:04.443074"
+      "created_at": "2026-10-17T13:43:07.218352"
     },
     {
       "snapshot_date": "2026-06-11",
@@ -2081,7 +2081,7 @@
       "model_3_price_q1": 37598,
       "model_3_price_median": 37928,
       "model_3_price_q3": 38353,
-      "created_at": "2026-10-16T14:51:04.443078"
+      "created_at": "2026-10-17T13:43:07.218355"
     },
     {
       "snapshot_date": "2026-06-12",
@@ -2107,7 +2107,7 @@
       "model_3_price_q1": 37598,
       "model_3_price_median": 38186,
       "model_3_price_q3": 39619,
-      "created_at": "2026-10-16T14:51:04.443081"
+      "created_at": "2026-10-17T13:43:07.218357"
     },
     {
       "snapshot_date": "2026-06-13",
@@ -2133,7 +2133,7 @@
       "model_3_price_q1": 37598,
       "model_3_price_median": 37928,
       "model_3_price_q3": 38353,
-      "created_at": "2026-10-16T14:51:04.443085"
+      "created_at": "2026-10-17T13:43:07.218360"
     },
     {
       "snapshot_date": "2026-06-14",
@@ -2159,7 +2159,7 @@
       "model_3_price_q1": 37486,
       "model_3_price_median": 37695,
       "model_3_price_q3": 37948,
-      "created_at": "2026-10-16T14:51:04.443088"
+      "created_at": "2026-10-17T13:43:07.218363"
     },
     {
       "snapshot_date": "2026-06-15",
@@ -2185,7 +2185,7 @@
       "model_3_price_q1": 37475,
       "model_3_price_median": 37695,
       "model_3_price_q3": 39471,
-      "created_at": "2026-10-16T14:51:04.443092"
+      "created_at": "2026-10-17T13:43:07.218366"
     },
     {
       "snapshot_date": "2026-06-16",
@@ -2211,7 +2211,7 @@
       "model_3_price_q1": 37475,
       "model_3_price_median": 37695,
       "model_3_price_q3": 39471,
-      "created_at": "2026-10-16T14:51:04.443096"
+      "created_at": "2026-10-17T13:43:07.218369"
     },
     {
       "snapshot_date": "2026-06-17",
@@ -2237,7 +2237,7 @@
       "model_3_price_q1": 37475,
       "model_3_price_median": 37695,
       "model_3_price_q3": 39471,
-      "created_at": "2026-10-16T14:51:04.443099"
+      "created_at": "2026-10-17T13:43:07.218371"
     },
     {
       "snapshot_date": "2026-06-18",
@@ -2263,7 +2263,7 @@
       "model_3_price_q1": 35467,
       "model_3_price_median": 37500,
       "model_3_price_q3": 37944,
-      "created_at": "2026-10-16T14:51:04.443103"
+      "created_at": "2026-10-17T13:43:07.218374"
     },
     {
       "snapshot_date": "2026-06-19",
@@ -2289,7 +2289,7 @@
       "model_3_price_q1": 36600,
       "model_3_price_median": 37944,
       "model_3_price_q3": 40493,
-      "created_at": "2026-10-16T14:51:04.443106"
+      "created_at": "2026-10-17T13:43:07.218377"
     },
     {
       "snapshot_date": "2026-06-20",
@@ -2315,7 +2315,7 @@
       "model_3_price_q1": 37000,
       "model_3_price_median": 37998,
       "model_3_price_q3": 41977,
-      "created_at": "2026-10-16T14:51:04.443110"
+      "created_at": "2026-10-17T13:43:07.218380"
     },
     {
       "snapshot_date": "2026-06-21",
@@ -2341,7 +2341,7 @@
       "model_3_price_q1": 37000,
       "model_3_price_median": 37998,
       "model_3_price_q3": 41977,
-      "created_at": "2026-10-16T14:51:04.443114"
+      "created_at": "2026-10-17T13:43:07.218383"
     },
     {
       "snapshot_date": "2026-06-22",
@@ -2367,7 +2367,7 @@
       "model_3_price_q1": 37467,
       "model_3_price_median": 38590,
       "model_3_price_q3": 39998,
-      "created_at": "2026-10-16T14:51:04.443117"
+      "created_at": "2026-10-17T13:43:07.218386"
     },
     {
       "snapshot_date": "2026-06-23",
@@ -2393,7 +2393,7 @@
       "model_3_price_q1": 36844,
       "model_3_price_median": 38240,
       "model_3_price_q3": 39242,
-      "created_at": "2026-10-16T14:51:04.443121"
+      "created_at": "2026-10-17T13:43:07.218389"
     },
     {
       "snapshot_date": "2026-06-24",
@@ -2419,7 +2419,7 @@
       "model_3_price_q1": 37481,
       "model_3_price_median": 38590,
       "model_3_price_q3": 43794,
-      "created_at": "2026-10-16T14:51:04.443124"
+      "created_at": "2026-10-17T13:43:07.218392"
     },
     {
       "snapshot_date": "2026-06-25",
@@ -2445,7 +2445,7 @@
       "model_3_price_q1": 37488,
       "model_3_price_median": 38790,
       "model_3_price_q3": 43146,
-      "created_at": "2026-10-16T14:51:04.443128"
+      "created_at": "2026-10-17T13:43:07.218395"
     },
     {
       "snapshot_date": "2026-06-26",
@@ -2471,7 +2471,7 @@
       "model_3_price_q1": 37448,
       "model_3_price_median": 38790,
       "model_3_price_q3": 43146,
-      "created_at": "2026-10-16T14:51:04.443131"
+      "created_at": "2026-10-17T13:43:07.218398"
     },
     {
       "snapshot_date": "2026-06-27",
@@ -2497,7 +2497,7 @@
       "model_3_price_q1": 37390,
       "model_3_price_median": 38990,
       "model_3_price_q3": 41998,
-      "created_at": "2026-10-16T14:51:04.443135"
+      "created_at": "2026-10-17T13:43:07.218401"
     },
     {
       "snapshot_date": "2026-06-28",
@@ -2523,7 +2523,7 @@
       "model_3_price_q1": 37232,
       "model_3_price_median": 38990,
       "model_3_price_q3": 43794,
-      "created_at": "2026-10-16T14:51:04.443138"
+      "created_at": "2026-10-17T13:43:07.218403"
     },
     {
       "snapshot_date": "2026-06-29",
@@ -2549,7 +2549,7 @@
       "model_3_price_q1": 37232,
       "model_3_price_median": 37497,
       "model_3_price_q3": 43794,
-      "created_at": "2026-10-16T14:51:04.443142"
+      "created_at": "2026-10-17T13:43:07.218406"
     },
     {
       "snapshot_date": "2026-06-30",
@@ -2575,7 +2575,7 @@
       "model_3_price_q1": 37350,
       "model_3_price_median": 38244,
       "model_3_price_q3": 42896,
-      "created_at": "2026-10-16T14:51:04.443146"
+      "created_at": "2026-10-17T13:43:07.218409"
     },
     {
       "snapshot_date": "2026-07-01",
@@ -2601,7 +2601,7 @@
       "model_3_price_q1": 37350,
       "model_3_price_median": 39248,
       "model_3_price_q3": 44396,
-      "created_at": "2026-10-16T14:51:04.443149"
+      "created_at": "2026-10-17T13:43:07.218412"
     },
     {
       "snapshot_date": "2026-07-02",
@@ -2627,7 +2627,7 @@
       "model_3_price_q1": 37350,
       "model_3_price_median": 38244,
       "model_3_price_q3": 42498,
-      "created_at": "2026-10-16T14:51:04.443153"
+      "created_at": "2026-10-17T13:43:07.218415"
     },
     {
       "snapshot_date": "2026-07-03",
@@ -2653,7 +2653,7 @@
       "model_3_price_q1": 37350,
       "model_3_price_median": 38244,
       "model_3_price_q3": 42498,
-      "created_at": "2026-10-16T14:51:04.443156"
+      "created_at": "2026-10-17T13:43:07.218417"
     },
     {
       "snapshot_date": "2026-07-04",
@@ -2679,7 +2679,7 @@
       "model_3_price_q1": 37232,
       "model_3_price_median": 37497,
       "model_3_price_q3": 41498,
-      "created_at": "2026-10-16T14:51:04.443159"
+      "created_at": "2026-10-17T13:43:07.218422"
     },
     {
       "snapshot_date": "2026-07-05",
@@ -2705,7 +2705,7 @@
       "model_3_price_q1": 36996,
       "model_3_price_median": 37497,
       "model_3_price_q3": 40258,
-      "created_at": "2026-10-16T14:51:04.443163"
+      "created_at": "2026-10-17T13:43:07.218425"
     },
     {
       "snapshot_date": "2026-07-06",
@@ -2731,7 +2731,7 @@
       "model_3_price_q1": 36996,
       "model_3_price_median": 37497,
       "model_3_price_q3": 40258,
-      "created_at": "2026-10-16T14:51:04.443167"
+      "created_at": "2026-10-17T13:43:07.218428"
     },
     {
       "snapshot_date": "2026-07-07",
@@ -2757,7 +2757,7 @@
       "model_3_price_q1": 36996,
       "model_3_price_median": 38990,
       "model_3_price_q3": 41488,
-      "created_at": "2026-10-16T14:51:04.443170"
+      "created_at": "2026-10-17T13:43:07.218430"
     },
     {
       "snapshot_date": "2026-07-08",
@@ -2783,7 +2783,7 @@
       "model_3_price_q1": 36996,
       "model_3_price_median": 37497,
       "model_3_price_q3": 40190,
-      "created_at": "2026-10-16T14:51:04.443173"
+      "created_at": "2026-10-17T13:43:07.218433"
     },
     {
       "snapshot_date": "2026-07-10",
@@ -2809,7 +2809,7 @@
       "model_3_price_q1": 36998,
       "model_3_price_median": 37590,
       "model_3_price_q3": 40998,
-      "created_at": "2026-10-16T14:51:04.443184"
+      "created_at": "2026-10-17T13:43:07.218436"
     },
     {
       "snapshot_date": "2026-07-11",
@@ -2835,7 +2835,7 @@
       "model_3_price_q1": 36995,
       "model_3_price_median": 37590,
       "model_3_price_q3": 40998,
-      "created_at": "2026-10-16T14:51:04.443187"
+      "created_at": "2026-10-17T13:43:07.218439"
     },
     {
       "snapshot_date": "2026-07-12",
@@ -2861,7 +2861,7 @@
       "model_3_price_q1": 36998,
       "model_3_price_median": 38990,
       "model_3_price_q3": 41590,
-      "created_at": "2026-10-16T14:51:04.443191"
+      "created_at": "2026-10-17T13:43:07.218442"
     },
     {
       "snapshot_date": "2026-07-13",
@@ -2887,7 +2887,7 @@
       "model_3_price_q1": 37248,
       "model_3_price_median": 38590,
       "model_3_price_q3": 41294,
-      "created_at": "2026-10-16T14:51:04.443194"
+      "created_at": "2026-10-17T13:43:07.218445"
     },
     {
       "snapshot_date": "2026-07-14",
@@ -2913,7 +2913,7 @@
       "model_3_price_q1": 37123,
       "model_3_price_median": 38464,
       "model_3_price_q3": 41442,
-      "created_at": "2026-10-16T14:51:04.443198"
+      "created_at": "2026-10-17T13:43:07.218448"
     },
     {
       "snapshot_date": "2026-07-15",
@@ -2939,7 +2939,7 @@
       "model_3_price_q1": 36846,
       "model_3_price_median": 38464,
       "model_3_price_q3": 41442,
-      "created_at": "2026-10-16T14:51:04.443201"
+      "created_at": "2026-10-17T13:43:07.218451"
     },
     {
       "snapshot_date": "2026-07-16",
@@ -2965,7 +2965,7 @@
       "model_3_price_q1": 37068,
       "model_3_price_median": 38339,
       "model_3_price_q3": 41294,
-      "created_at": "2026-10-16T14:51:04.443205"
+      "created_at": "2026-10-17T13:43:07.218453"
     },
     {
       "snapshot_date": "2026-07-17",
@@ -2991,7 +2991,7 @@
       "model_3_price_q1": 37204,
       "model_3_price_median": 38420,
       "model_3_price_q3": 42192,
-      "created_at": "2026-10-16T14:51:04.443208"
+      "created_at": "2026-10-17T13:43:07.218456"
     },
     {
       "snapshot_date": "2026-07-18",
@@ -3017,7 +3017,7 @@
       "model_3_price_q1": 37620,
       "model_3_price_median": 38791,
       "model_3_price_q3": 43396,
-      "created_at": "2026-10-16T14:51:04.443212"
+      "created_at": "2026-10-17T13:43:07.218459"
     },
     {
       "snapshot_date": "2026-07-19",
@@ -3043,7 +3043,7 @@
       "model_3_price_q1": 37990,
       "model_3_price_median": 39082,
       "model_3_price_q3": 43998,
-      "created_at": "2026-10-16T14:51:04.443215"
+      "created_at": "2026-10-17T13:43:07.218462"
     },
     {
       "snapshot_date": "2026-07-20",
@@ -3069,7 +3069,7 @@
       "model_3_price_q1": 38420,
       "model_3_price_median": 40998,
       "model_3_price_q3": 44994,
-      "created_at": "2026-10-16T14:51:04.443219"
+      "created_at": "2026-10-17T13:43:07.218464"
     },
     {
       "snapshot_date": "2026-07-21",
@@ -3095,7 +3095,7 @@
       "model_3_price_q1": 38420,
       "model_3_price_median": 40998,
       "model_3_price_q3": 44994,
-      "created_at": "2026-10-16T14:51:04.443222"
+      "created_at": "2026-10-17T13:43:07.218467"
     },
     {
       "snapshot_date": "2026-07-22",
@@ -3121,7 +3121,7 @@
       "model_3_price_q1": 38379,
       "model_3_price_median": 39290,
       "model_3_price_q3": 45492,
-      "created_at": "2026-10-16T14:51:04.443226"
+      "created_at": "2026-10-17T13:43:07.218470"
     },
     {
       "snapshot_date": "2026-07-23",
@@ -3147,7 +3147,7 @@
       "model_3_price_q1": 38339,
       "model_3_price_median": 39998,
       "model_3_price_q3": 43998,
-      "created_at": "2026-10-16T14:51:04.443230"
+      "created_at": "2026-10-17T13:43:07.218472"
     },
     {
       "snapshot_date": "2026-07-24",
@@ -3173,7 +3173,7 @@
       "model_3_price_q1": 37494,
       "model_3_price_median": 38582,
       "model_3_price_q3": 42996,
-      "created_at": "2026-10-16T14:51:04.443233"
+      "created_at": "2026-10-17T13:43:07.218475"
     },
     {
       "snapshot_date": "2026-07-25",
@@ -3199,7 +3199,7 @@
       "model_3_price_q1": 37990,
       "model_3_price_median": 39998,
       "model_3_price_q3": 43998,
-      "created_at": "2026-10-16T14:51:04.443236"
+      "created_at": "2026-10-17T13:43:07.218478"
     },
     {
       "snapshot_date": "2026-07-26",
@@ -3225,7 +3225,7 @@
       "model_3_price_q1": 37810,
       "model_3_price_median": 38500,
       "model_3_price_q3": 41794,
-      "created_at": "2026-10-16T14:51:04.443241"
+      "created_at": "2026-10-17T13:43:07.218481"
     },
     {
       "snapshot_date": "2026-07-27",
@@ -3251,7 +3251,7 @@
       "model_3_price_q1": 37810,
       "model_3_price_median": 38500,
       "model_3_price_q3": 41794,
-      "created_at": "2026-10-16T14:51:04.443245"
+      "created_at": "2026-10-17T13:43:07.218484"
     },
     {
       "snapshot_date": "2026-07-28",
@@ -3277,7 +3277,7 @@
       "model_3_price_q1": 37969,
       "model_3_price_median": 39245,
       "model_3_price_q3": 40896,
-      "created_at": "2026-10-16T14:51:04.443249"
+      "created_at": "2026-10-17T13:43:07.218487"
     },
     {
       "snapshot_date": "2026-07-29",
@@ -3303,7 +3303,7 @@
       "model_3_price_q1": 37606,
       "model_3_price_median": 38500,
       "model_3_price_q3": 41794,
-      "created_at": "2026-10-16T14:51:04.443252"
+      "created_at": "2026-10-17T13:43:07.218490"
     },
     {
       "snapshot_date": "2026-07-30",
@@ -3329,7 +3329,7 @@
       "model_3_price_q1": 37847,
       "model_3_price_median": 40494,
       "model_3_price_q3": 44340,
-      "created_at": "2026-10-16T14:51:04.443256"
+      "created_at": "2026-10-17T13:43:07.218494"
     },
     {
       "snapshot_date": "2026-07-31",
@@ -3355,7 +3355,7 @@
       "model_3_price_q1": 37720,
       "model_3_price_median": 39245,
       "model_3_price_q3": 42942,
-      "created_at": "2026-10-16T14:51:04.443260"
+      "created_at": "2026-10-17T13:43:07.218497"
     },
     {
       "snapshot_date": "2026-08-01",
@@ -3381,7 +3381,7 @@
       "model_3_price_q1": 37810,
       "model_3_price_median": 38998,
       "model_3_price_q3": 45070,
-      "created_at": "2026-10-16T14:51:04.443264"
+      "created_at": "2026-10-17T13:43:07.218499"
     },
     {
       "snapshot_date": "2026-08-02",
@@ -3407,7 +3407,7 @@
       "model_3_price_q1": 37900,
       "model_3_price_median": 38550,
       "model_3_price_q3": 40890,
-      "created_at": "2026-10-16T14:51:04.443268"
+      "created_at": "2026-10-17T13:43:07.218502"
     },
     {
       "snapshot_date": "2026-08-03",
@@ -3433,7 +3433,7 @@
       "model_3_price_q1": 38245,
       "model_3_price_median": 38998,
       "model_3_price_q3": 44090,
-      "created_at": "2026-10-16T14:51:04.443272"
+      "created_at": "2026-10-17T13:43:07.218505"
     },
     {
       "snapshot_date": "2026-08-04",
@@ -3459,7 +3459,7 @@
       "model_3_price_q1": 38118,
       "model_3_price_median": 38798,
       "model_3_price_q3": 44340,
-      "created_at": "2026-10-16T14:51:04.443275"
+      "created_at": "2026-10-17T13:43:07.218508"
     },
     {
       "snapshot_date": "2026-08-05",
@@ -3485,7 +3485,7 @@
       "model_3_price_q1": 37638,
       "model_3_price_median": 38550,
       "model_3_price_q3": 44924,
-      "created_at": "2026-10-16T14:51:04.443279"
+      "created_at": "2026-10-17T13:43:07.218510"
     },
     {
       "snapshot_date": "2026-08-06",
@@ -3511,7 +3511,7 @@
       "model_3_price_q1": 37638,
       "model_3_price_median": 38550,
       "model_3_price_q3": 44924,
-      "created_at": "2026-10-16T14:51:04.443282"
+      "created_at": "2026-10-17T13:43:07.218513"
     },
     {
       "snapshot_date": "2026-08-07",
@@ -3537,7 +3537,7 @@
       "model_3_price_q1": 37750,
       "model_3_price_median": 41545,
       "model_3_price_q3": 45591,
-      "created_at": "2026-10-16T14:51:04.443286"
+      "created_at": "2026-10-17T13:43:07.218516"
     },
     {
       "snapshot_date": "2026-08-08",
@@ -3563,7 +3563,7 @@
       "model_3_price_q1": 38000,
       "model_3_price_median": 44590,
       "model_3_price_q3": 46212,
-      "created_at": "2026-10-16T14:51:04.443289"
+      "created_at": "2026-10-17T13:43:07.218519"
     },
     {
       "snapshot_date": "2026-08-09",
@@ -3589,7 +3589,7 @@
       "model_3_price_q1": 37500,
       "model_3_price_median": 38500,
       "model_3_price_q3": 45925,
-      "created_at": "2026-10-16T14:51:04.443293"
+      "created_at": "2026-10-17T13:43:07.218522"
     },
     {
       "snapshot_date": "2026-08-10",
@@ -3615,7 +3615,7 @@
       "model_3_price_q1": 37500,
       "model_3_price_median": 38500,
       "model_3_price_q3": 45925,
-      "created_at": "2026-10-16T14:51:04.443296"
+      "created_at": "2026-10-17T13:43:07.218525"
     },
     {
       "snapshot_date": "2026-08-11",
@@ -3641,7 +3641,7 @@
       "model_3_price_q1": 37500,
       "model_3_price_median": 38500,
       "model_3_price_q3": 45925,
-      "created_at": "2026-10-16T14:51:04.443300"
+      "created_at": "2026-10-17T13:43:07.218527"
     },
     {
       "snapshot_date": "2026-08-12",
@@ -3667,7 +3667,7 @@
       "model_3_price_q1": 37750,
       "model_3_price_median": 42212,
       "model_3_price_q3": 47480,
-      "created_at": "2026-10-16T14:51:04.443304"
+      "created_at": "2026-10-17T13:43:07.218530"
     },
     {
       "snapshot_date": "2026-08-13",
@@ -3693,7 +3693,7 @@
       "model_3_price_q1": 37750,
       "model_3_price_median": 42212,
       "model_3_price_q3": 47480,
-      "created_at": "2026-10-16T14:51:04.443307"
+      "created_at": "2026-10-17T13:43:07.218533"
     },
     {
       "snapshot_date": "2026-08-14",
@@ -3719,7 +3719,7 @@
       "model_3_price_q1": 36240,
       "model_3_price_median": 38500,
       "model_3_price_q3": 46962,
-      "created_at": "2026-10-16T14:51:04.443311"
+      "created_at": "2026-10-17T13:43:07.218536"
     },
     {
       "snapshot_date": "2026-08-15",
@@ -3745,7 +3745,7 @@
       "model_3_price_q1": 36240,
       "model_3_price_median": 38500,
       "model_3_price_q3": 46962,
-      "created_at": "2026-10-16T14:51:04.443314"
+      "created_at": "2026-10-17T13:43:07.218539"
     },
     {
       "snapshot_date": "2026-08-16",
@@ -3771,7 +3771,7 @@
       "model_3_price_q1": 36240,
       "model_3_price_median": 38500,
       "model_3_price_q3": 46962,
-      "created_at": "2026-10-16T14:51:04.443318"
+      "created_at": "2026-10-17T13:43:07.218543"
     },
     {
       "snapshot_date": "2026-08-17",
@@ -3797,7 +3797,7 @@
       "model_3_price_q1": 36240,
       "model_3_price_median": 38500,
       "model_3_price_q3": 46962,
-      "created_at": "2026-10-16T14:51:04.443321"
+      "created_at": "2026-10-17T13:43:07.218546"
     },
     {
       "snapshot_date": "2026-08-18",
@@ -3823,7 +3823,7 @@
       "model_3_price_q1": 36240,
       "model_3_price_median": 38500,
       "model_3_price_q3": 46962,
-      "created_at": "2026-10-16T14:51:04.443325"
+      "created_at": "2026-10-17T13:43:07.218549"
     },
     {
       "snapshot_date": "2026-08-19",
@@ -3849,7 +3849,7 @@
       "model_3_price_q1": 36240,
       "model_3_price_median": 38500,
       "model_3_price_q3": 46962,
-      "created_at": "2026-10-16T14:51:04.443328"
+      "created_at": "2026-10-17T13:43:07.218552"
     },
     {
       "snapshot_date": "2026-08-20",
@@ -3875,7 +3875,7 @@
       "model_3_price_q1": 36870,
       "model_3_price_median": 38875,
       "model_3_price_q3": 46444,
-      "created_at": "2026-10-16T14:51:04.443331"
+      "created_at": "2026-10-17T13:43:07.218555"
     },
     {
       "snapshot_date": "2026-08-21",
@@ -3901,7 +3901,7 @@
       "model_3_price_q1": 37500,
       "model_3_price_median": 39250,
       "model_3_price_q3": 46000,
-      "created_at": "2026-10-16T14:51:04.443337"
+      "created_at": "2026-10-17T13:43:07.218558"
     },
     {
       "snapshot_date": "2026-08-22",
@@ -3927,7 +3927,7 @@
       "model_3_price_q1": 35488,
       "model_3_price_median": 37500,
       "model_3_price_q3": 42212,
-      "created_at": "2026-10-16T14:51:04.443341"
+      "created_at": "2026-10-17T13:43:07.218560"
     },
     {
       "snapshot_date": "2026-08-23",
@@ -3953,7 +3953,7 @@
       "model_3_price_q1": 35865,
       "model_3_price_median": 38000,
       "model_3_price_q3": 46444,
-      "created_at": "2026-10-16T14:51:04.443344"
+      "created_at": "2026-10-17T13:43:07.218563"
     },
     {
       "snapshot_date": "2026-08-24",
@@ -3979,7 +3979,7 @@
       "model_3_price_q1": 35865,
       "model_3_price_median": 38000,
       "model_3_price_q3": 46444,
-      "created_at": "2026-10-16T14:51:04.443348"
+      "created_at": "2026-10-17T13:43:07.218566"
     },
     {
       "snapshot_date": "2026-08-25",
@@ -4005,7 +4005,7 @@
       "model_3_price_q1": 35741,
       "model_3_price_median": 38000,
       "model_3_price_q3": 46444,
-      "created_at": "2026-10-16T14:51:04.443351"
+      "created_at": "2026-10-17T13:43:07.218569"
     },
     {
       "snapshot_date": "2026-08-26",
@@ -4031,7 +4031,7 @@
       "model_3_price_q1": 35995,
       "model_3_price_median": 37500,
       "model_3_price_q3": 38500,
-      "created_at": "2026-10-16T14:51:04.443355"
+      "created_at": "2026-10-17T13:43:07.218572"
     },
     {
       "snapshot_date": "2026-08-27",
@@ -4057,7 +4057,7 @@
       "model_3_price_q1": 35865,
       "model_3_price_median": 37346,
       "model_3_price_q3": 40215,
-      "created_at": "2026-10-16T14:51:04.443358"
+      "created_at": "2026-10-17T13:43:07.218575"
     },
     {
       "snapshot_date": "2026-08-28",
@@ -4083,7 +4083,7 @@
       "model_3_price_q1": 35865,
       "model_3_price_median": 36999,
       "model_3_price_q3": 37769,
-      "created_at": "2026-10-16T14:51:04.443361"
+      "created_at": "2026-10-17T13:43:07.218577"
     },
     {
       "snapshot_date": "2026-08-29",
@@ -4109,7 +4109,7 @@
       "model_3_price_q1": 35865,
       "model_3_price_median": 37345,
       "model_3_price_q3": 38245,
-      "created_at": "2026-10-16T14:51:04.443365"
+      "created_at": "2026-10-17T13:43:07.218580"
     },
     {
       "snapshot_date": "2026-08-30",
@@ -4135,7 +4135,7 @@
       "model_3_price_q1": 35865,
       "model_3_price_median": 37341,
       "model_3_price_q3": 38245,
-      "created_at": "2026-10-16T14:51:04.443368"
+      "created_at": "2026-10-17T13:43:07.218583"
     },
     {
       "snapshot_date": "2026-08-31",
@@ -4161,7 +4161,7 @@
       "model_3_price_q1": 35995,
       "model_3_price_median": 37653,
       "model_3_price_q3": 37995,
-      "created_at": "2026-10-16T14:51:04.443372"
+      "created_at": "2026-10-17T13:43:07.218586"
     },
     {
       "snapshot_date": "2026-09-01",
@@ -4187,7 +4187,7 @@
       "model_3_price_q1": 35995,
       "model_3_price_median": 37653,
       "model_3_price_q3": 37995,
-      "created_at": "2026-10-16T14:51:04.443375"
+      "created_at": "2026-10-17T13:43:07.218589"
     },
     {
       "snapshot_date": "2026-09-02",
@@ -4213,7 +4213,7 @@
       "model_3_price_q1": 35995,
       "model_3_price_median": 37653,
       "model_3_price_q3": 37995,
-      "created_at": "2026-10-16T14:51:04.443379"
+      "created_at": "2026-10-17T13:43:07.218591"
     },
     {
       "snapshot_date": "2026-09-03",
@@ -4239,7 +4239,7 @@
       "model_3_price_q1": 36617,
       "model_3_price_median": 37822,
       "model_3_price_q3": 40629,
-      "created_at": "2026-10-16T14:51:04.443382"
+      "created_at": "2026-10-17T13:43:07.218594"
     },
     {
       "snapshot_date": "2026-09-04",
@@ -4265,7 +4265,7 @@
       "model_3_price_q1": 36493,
       "model_3_price_median": 37653,
       "model_3_price_q3": 37995,
-      "created_at": "2026-10-16T14:51:04.443386"
+      "created_at": "2026-10-17T13:43:07.218597"
     },
     {
       "snapshot_date": "2026-09-05",
@@ -4291,7 +4291,7 @@
       "model_3_price_q1": 36493,
       "model_3_price_median": 37653,
       "model_3_price_q3": 37995,
-      "created_at": "2026-10-16T14:51:04.443389"
+      "created_at": "2026-10-17T13:43:07.218600"
     },
     {
       "snapshot_date": "2026-09-06",
@@ -4317,7 +4317,7 @@
       "model_3_price_q1": 36493,
       "model_3_price_median": 37653,
       "model_3_price_q3": 37995,
-      "created_at": "2026-10-16T14:51:04.443392"
+      "created_at": "2026-10-17T13:43:07.218603"
     },
     {
       "snapshot_date": "2026-09-07",
@@ -4343,7 +4343,7 @@
       "model_3_price_q1": 36244,
       "model_3_price_median": 37653,
       "model_3_price_q3": 39378,
-      "created_at": "2026-10-16T14:51:04.443396"
+      "created_at": "2026-10-17T13:43:07.218606"
     },
     {
       "snapshot_date": "2026-09-08",
@@ -4369,7 +4369,7 @@
       "model_3_price_q1": 36495,
       "model_3_price_median": 37653,
       "model_3_price_q3": 37995,
-      "created_at": "2026-10-16T14:51:04.443399"
+      "created_at": "2026-10-17T13:43:07.218608"
     },
     {
       "snapshot_date": "2026-09-09",
@@ -4395,7 +4395,7 @@
       "model_3_price_q1": 35635,
       "model_3_price_median": 36990,
       "model_3_price_q3": 39378,
-      "created_at": "2026-10-16T14:51:04.443403"
+      "created_at": "2026-10-17T13:43:07.218611"
     },
     {
       "snapshot_date": "2026-09-10",
@@ -4421,7 +4421,7 @@
       "model_3_price_q1": 35306,
       "model_3_price_median": 36742,
       "model_3_price_q3": 37894,
-      "created_at": "2026-10-16T14:51:04.443406"
+      "created_at": "2026-10-17T13:43:07.218614"
     },
     {
       "snapshot_date": "2026-09-11",
@@ -4447,7 +4447,7 @@
       "model_3_price_q1": 35306,
       "model_3_price_median": 36742,
       "model_3_price_q3": 37894,
-      "created_at": "2026-10-16T14:51:04.443410"
+      "created_at": "2026-10-17T13:43:07.218617"
     },
     {
       "snapshot_date": "2026-09-12",
@@ -4473,7 +4473,7 @@
       "model_3_price_q1": 35306,
       "model_3_price_median": 36742,
       "model_3_price_q3": 37894,
-      "created_at": "2026-10-16T14:51:04.443413"
+      "created_at": "2026-10-17T13:43:07.218620"
     },
     {
       "snapshot_date": "2026-09-13",
@@ -4499,7 +4499,7 @@
       "model_3_price_q1": 35924,
       "model_3_price_median": 36742,
       "model_3_price_q3": 38639,
-      "created_at": "2026-10-16T14:51:04.443417"
+      "created_at": "2026-10-17T13:43:07.218623"
     },
     {
       "snapshot_date": "2026-09-14",
@@ -4525,7 +4525,7 @@
       "model_3_price_q1": 36368,
       "model_3_price_median": 37591,
       "model_3_price_q3": 39284,
-      "created_at": "2026-10-16T14:51:04.443420"
+      "created_at": "2026-10-17T13:43:07.218626"
     },
     {
       "snapshot_date": "2026-09-15",
@@ -4551,7 +4551,7 @@
       "model_3_price_q1": 36368,
       "model_3_price_median": 37591,
       "model_3_price_q3": 39284,
-      "created_at": "2026-10-16T14:51:04.443424"
+      "created_at": "2026-10-17T13:43:07.218628"
     },
     {
       "snapshot_date": "2026-09-15",
@@ -4577,7 +4577,7 @@
       "model_3_price_q1": 35467,
       "model_3_price_median": 37148,
       "model_3_price_q3": 40522,
-      "created_at": "2026-10-16T14:51:04.443428"
+      "created_at": "2026-10-17T13:43:07.218631"
     },
     {
       "snapshot_date": "2026-09-16",
@@ -4603,7 +4603,7 @@
       "model_3_price_q1": 35896,
       "model_3_price_median": 37591,
       "model_3_price_q3": 39050,
-      "created_at": "2026-10-16T14:51:04.443431"
+      "created_at": "2026-10-17T13:43:07.218634"
     },
     {
       "snapshot_date": "2026-09-16",
@@ -4629,7 +4629,7 @@
       "model_3_price_q1": 33995,
       "model_3_price_median": 36990,
       "model_3_price_q3": 39705,
-      "created_at": "2026-10-16T14:51:04.443434"
+      "created_at": "2026-10-17T13:43:07.218637"
     },
     {
       "snapshot_date": "2026-09-17",
@@ -4655,7 +4655,7 @@
       "model_3_price_q1": 35845,
       "model_3_price_median": 36990,
       "model_3_price_q3": 40105,
-      "created_at": "2026-10-16T14:51:04.443438"
+      "created_at": "2026-10-17T13:43:07.218640"
     },
     {
       "snapshot_date": "2026-09-17",
@@ -4681,7 +4681,7 @@
       "model_3_price_q1": 35376,
       "model_3_price_median": 36990,
       "model_3_price_q3": 39705,
-      "created_at": "2026-10-16T14:51:04.443441"
+      "created_at": "2026-10-17T13:43:07.218643"
     },
     {
       "snapshot_date": "2026-09-18",
@@ -4707,7 +4707,7 @@
       "model_3_price_q1": 36656,
       "model_3_price_median": 38745,
       "model_3_price_q3": 43062,
-      "created_at": "2026-10-16T14:51:04.443445"
+      "created_at": "2026-10-17T13:43:07.218645"
     },
     {
       "snapshot_date": "2026-09-18",
@@ -4733,7 +4733,7 @@
       "model_3_price_q1": 34686,
       "model_3_price_median": 36990,
       "model_3_price_q3": 40594,
-      "created_at": "2026-10-16T14:51:04.443448"
+      "created_at": "2026-10-17T13:43:07.218648"
     },
     {
       "snapshot_date": "2026-09-19",
@@ -4759,7 +4759,7 @@
       "model_3_price_q1": 36656,
       "model_3_price_median": 37992,
       "model_3_price_q3": 39952,
-      "created_at": "2026-10-16T14:51:04.443452"
+      "created_at": "2026-10-17T13:43:07.218651"
     },
     {
       "snapshot_date": "2026-09-19",
@@ -4785,7 +4785,7 @@
       "model_3_price_q1": 35406,
       "model_3_price_median": 36990,
       "model_3_price_q3": 42392,
-      "created_at": "2026-10-16T14:51:04.443455"
+      "created_at": "2026-10-17T13:43:07.218654"
     },
     {
       "snapshot_date": "2026-09-20",
@@ -4811,7 +4811,7 @@
       "model_3_price_q1": 37240,
       "model_3_price_median": 37994,
       "model_3_price_q3": 39952,
-      "created_at": "2026-10-16T14:51:04.443459"
+      "created_at": "2026-10-17T13:43:07.218657"
     },
     {
       "snapshot_date": "2026-09-20",
@@ -4837,7 +4837,7 @@
       "model_3_price_q1": 33992,
       "model_3_price_median": 36990,
       "model_3_price_q3": 42669,
-      "created_at": "2026-10-16T14:51:04.443462"
+      "created_at": "2026-10-17T13:43:07.218660"
     },
     {
       "snapshot_date": "2026-09-21",
@@ -4863,7 +4863,7 @@
       "model_3_price_q1": 37240,
       "model_3_price_median": 37994,
       "model_3_price_q3": 39952,
-      "created_at": "2026-10-16T14:51:04.443466"
+      "created_at": "2026-10-17T13:43:07.218663"
     },
     {
       "snapshot_date": "2026-09-21",
@@ -4889,7 +4889,7 @@
       "model_3_price_q1": 33972,
       "model_3_price_median": 36839,
       "model_3_price_q3": 41036,
-      "created_at": "2026-10-16T14:51:04.443469"
+      "created_at": "2026-10-17T13:43:07.218667"
     },
     {
       "snapshot_date": "2026-09-22",
@@ -4915,7 +4915,7 @@
       "model_3_price_q1": 37990,
       "model_3_price_median": 37995,
       "model_3_price_q3": 40105,
-      "created_at": "2026-10-16T14:51:04.443473"
+      "created_at": "2026-10-17T13:43:07.218670"
     },
     {
       "snapshot_date": "2026-09-22",
@@ -4941,7 +4941,7 @@
       "model_3_price_q1": 33956,
       "model_3_price_median": 36991,
       "model_3_price_q3": 44912,
-      "created_at": "2026-10-16T14:51:04.443476"
+      "created_at": "2026-10-17T13:43:07.218672"
     },
     {
       "snapshot_date": "2026-09-23",
@@ -4967,7 +4967,7 @@
       "model_3_price_q1": 37740,
       "model_3_price_median": 37994,
       "model_3_price_q3": 39648,
-      "created_at": "2026-10-16T14:51:04.443480"
+      "created_at": "2026-10-17T13:43:07.218675"
     },
     {
       "snapshot_date": "2026-09-23",
@@ -4993,7 +4993,7 @@
       "model_3_price_q1": 33616,
       "model_3_price_median": 38719,
       "model_3_price_q3": 44990,
-      "created_at": "2026-10-16T14:51:04.443483"
+      "created_at": "2026-10-17T13:43:07.218678"
     },
     {
       "snapshot_date": "2026-09-24",
@@ -5019,7 +5019,7 @@
       "model_3_price_q1": 37240,
       "model_3_price_median": 38742,
       "model_3_price_q3": 39952,
-      "created_at": "2026-10-16T14:51:04.443489"
+      "created_at": "2026-10-17T13:43:07.218681"
     },
     {
       "snapshot_date": "2026-09-24",
@@ -5045,7 +5045,7 @@
       "model_3_price_q1": 33480,
       "model_3_price_median": 37873,
       "model_3_price_q3": 44748,
-      "created_at": "2026-10-16T14:51:04.443493"
+      "created_at": "2026-10-17T13:43:07.218684"
     },
     {
       "snapshot_date": "2026-09-25",
@@ -5071,7 +5071,7 @@
       "model_3_price_q1": 37490,
       "model_3_price_median": 38576,
       "model_3_price_q3": 39242,
-      "created_at": "2026-10-16T14:51:04.443505"
+      "created_at": "2026-10-17T13:43:07.218689"
     },
     {
       "snapshot_date": "2026-09-25",
@@ -5097,7 +5097,7 @@
       "model_3_price_q1": 33490,
       "model_3_price_median": 38598,
       "model_3_price_q3": 41998,
-      "created_at": "2026-10-16T14:51:04.443510"
+      "created_at": "2026-10-17T13:43:07.218693"
     },
     {
       "snapshot_date": "2026-09-26",
@@ -5123,7 +5123,7 @@
       "model_3_price_q1": 37490,
       "model_3_price_median": 38576,
       "model_3_price_q3": 39240,
-      "created_at": "2026-10-16T14:51:04.443515"
+      "created_at": "2026-10-17T13:43:07.218697"
     },
     {
       "snapshot_date": "2026-09-26",
@@ -5149,7 +5149,7 @@
       "model_3_price_q1": 33736,
       "model_3_price_median": 38998,
       "model_3_price_q3": 44562,
-      "created_at": "2026-10-16T14:51:04.443519"
+      "created_at": "2026-10-17T13:43:07.218700"
     },
     {
       "snapshot_date": "2026-09-27",
@@ -5175,7 +5175,7 @@
       "model_3_price_q1": 38180,
       "model_3_price_median": 39240,
       "model_3_price_q3": 40869,
-      "created_at": "2026-10-16T14:51:04.443523"
+      "created_at": "2026-10-17T13:43:07.218703"
     },
     {
       "snapshot_date": "2026-09-27",
@@ -5201,7 +5201,7 @@
       "model_3_price_q1": 33736,
       "model_3_price_median": 38990,
       "model_3_price_q3": 43243,
-      "created_at": "2026-10-16T14:51:04.443527"
+      "created_at": "2026-10-17T13:43:07.218706"
     },
     {
       "snapshot_date": "2026-09-28",
@@ -5227,7 +5227,7 @@
       "model_3_price_q1": 38576,
       "model_3_price_median": 38990,
       "model_3_price_q3": 39495,
-      "created_at": "2026-10-16T14:51:04.443530"
+      "created_at": "2026-10-17T13:43:07.218708"
     },
     {
       "snapshot_date": "2026-09-28",
@@ -5253,7 +5253,7 @@
       "model_3_price_q1": 33995,
       "model_3_price_median": 39705,
       "model_3_price_q3": 42590,
-      "created_at": "2026-10-16T14:51:04.443534"
+      "created_at": "2026-10-17T13:43:07.218711"
     },
     {
       "snapshot_date": "2026-09-29",
@@ -5279,7 +5279,7 @@
       "model_3_price_q1": 38724,
       "model_3_price_median": 38990,
       "model_3_price_q3": 39493,
-      "created_at": "2026-10-16T14:51:04.443537"
+      "created_at": "2026-10-17T13:43:07.218714"
     },
     {
       "snapshot_date": "2026-09-29",
@@ -5305,7 +5305,7 @@
       "model_3_price_q1": 33736,
       "model_3_price_median": 38598,
       "model_3_price_q3": 41498,
-      "created_at": "2026-10-16T14:51:04.443541"
+      "created_at": "2026-10-17T13:43:07.218716"
     },
     {
       "snapshot_date": "2026-10-03",
@@ -5331,7 +5331,7 @@
       "model_3_price_q1": 38180,
       "model_3_price_median": 38931,
       "model_3_price_q3": 42736,
-      "created_at": "2026-10-16T14:51:04.443544"
+      "created_at": "2026-10-17T13:43:07.218719"
     },
     {
       "snapshot_date": "2026-10-03",
@@ -5357,7 +5357,7 @@
       "model_3_price_q1": 33502,
       "model_3_price_median": 37994,
       "model_3_price_q3": 41998,
-      "created_at": "2026-10-16T14:51:04.443548"
+      "created_at": "2026-10-17T13:43:07.218722"
     },
     {
       "snapshot_date": "2026-10-04",
@@ -5383,7 +5383,7 @@
       "model_3_price_q1": 38180,
       "model_3_price_median": 38931,
       "model_3_price_q3": 42736,
-      "created_at": "2026-10-16T14:51:04.443551"
+      "created_at": "2026-10-17T13:43:07.218725"
     },
     {
       "snapshot_date": "2026-10-04",
@@ -5409,7 +5409,7 @@
       "model_3_price_q1": 33510,
       "model_3_price_median": 37998,
       "model_3_price_q3": 41998,
-      "created_at": "2026-10-16T14:51:04.443555"
+      "created_at": "2026-10-17T13:43:07.218728"
     },
     {
       "snapshot_date": "2026-10-05",
@@ -5435,7 +5435,7 @@
       "model_3_price_q1": 38643,
       "model_3_price_median": 39084,
       "model_3_price_q3": 41847,
-      "created_at": "2026-10-16T14:51:04.443559"
+      "created_at": "2026-10-17T13:43:07.218731"
     },
     {
       "snapshot_date": "2026-10-05",
@@ -5461,7 +5461,7 @@
       "model_3_price_q1": 34494,
       "model_3_price_median": 38196,
       "model_3_price_q3": 41485,
-      "created_at": "2026-10-16T14:51:04.443563"
+      "created_at": "2026-10-17T13:43:07.218734"
     },
     {
       "snapshot_date": "2026-10-06",
@@ -5487,7 +5487,7 @@
       "model_3_price_q1": 36990,
       "model_3_price_median": 38872,
       "model_3_price_q3": 41998,
-      "created_at": "2026-10-16T14:51:04.443566"
+      "created_at": "2026-10-17T13:43:07.218737"
     },
     {
       "snapshot_date": "2026-10-06",
@@ -5513,7 +5513,7 @@
       "model_3_price_q1": 33995,
       "model_3_price_median": 38394,
       "model_3_price_q3": 41170,
-      "created_at": "2026-10-16T14:51:04.443570"
+      "created_at": "2026-10-17T13:43:07.218740"
     },
     {
       "snapshot_date": "2026-10-07",
@@ -5539,7 +5539,7 @@
       "model_3_price_q1": 37560,
       "model_3_price_median": 38872,
       "model_3_price_q3": 41696,
-      "created_at": "2026-10-16T14:51:04.443573"
+      "created_at": "2026-10-17T13:43:07.218743"
     },
     {
       "snapshot_date": "2026-10-07",
@@ -5565,7 +5565,7 @@
       "model_3_price_q1": 33866,
       "model_3_price_median": 38196,
       "model_3_price_q3": 41030,
-      "created_at": "2026-10-16T14:51:04.443577"
+      "created_at": "2026-10-17T13:43:07.218746"
     },
     {
       "snapshot_date": "2026-10-08",
@@ -5591,7 +5591,7 @@
       "model_3_price_q1": 37386,
       "model_3_price_median": 38858,
       "model_3_price_q3": 40870,
-      "created_at": "2026-10-16T14:51:04.443580"
+      "created_at": "2026-10-17T13:43:07.218748"
     },
     {
       "snapshot_date": "2026-10-08",
@@ -5617,7 +5617,7 @@
       "model_3_price_q1": 34671,
       "model_3_price_median": 39142,
       "model_3_price_q3": 40903,
-      "created_at": "2026-10-16T14:51:04.443584"
+      "created_at": "2026-10-17T13:43:07.218751"
     },
     {
       "snapshot_date": "2026-10-09",
@@ -5643,7 +5643,7 @@
       "model_3_price_q1": 38843,
       "model_3_price_median": 41395,
       "model_3_price_q3": 42990,
-      "created_at": "2026-10-16T14:51:04.443587"
+      "created_at": "2026-10-17T13:43:07.218754"
     },
     {
       "snapshot_date": "2026-10-09",
@@ -5669,7 +5669,7 @@
       "model_3_price_q1": 33992,
       "model_3_price_median": 38010,
       "model_3_price_q3": 40822,
-      "created_at": "2026-10-16T14:51:04.443591"
+      "created_at": "2026-10-17T13:43:07.218757"
     },
     {
       "snapshot_date": "2026-10-10",
@@ -5695,7 +5695,7 @@
       "model_3_price_q1": 38776,
       "model_3_price_median": 40134,
       "model_3_price_q3": 42246,
-      "created_at": "2026-10-16T14:51:04.443594"
+      "created_at": "2026-10-17T13:43:07.218760"
     },
     {
       "snapshot_date": "2026-10-10",
@@ -5721,7 +5721,7 @@
       "model_3_price_q1": 36964,
       "model_3_price_median": 39891,
       "model_3_price_q3": 41998,
-      "created_at": "2026-10-16T14:51:04.443598"
+      "created_at": "2026-10-17T13:43:07.218762"
     },
     {
       "snapshot_date": "2026-10-11",
@@ -5747,7 +5747,7 @@
       "model_3_price_q1": 38843,
       "model_3_price_median": 41395,
       "model_3_price_q3": 41998,
-      "created_at": "2026-10-16T14:51:04.443602"
+      "created_at": "2026-10-17T13:43:07.218766"
     },
     {
       "snapshot_date": "2026-10-11",
@@ -5773,7 +5773,7 @@
       "model_3_price_q1": 36931,
       "model_3_price_median": 38990,
       "model_3_price_q3": 41998,
-      "created_at": "2026-10-16T14:51:04.443605"
+      "created_at": "2026-10-17T13:43:07.218769"
     },
     {
       "snapshot_date": "2026-10-12",
@@ -5799,7 +5799,7 @@
       "model_3_price_q1": 38858,
       "model_3_price_median": 41395,
       "model_3_price_q3": 41994,
-      "created_at": "2026-10-16T14:51:04.443609"
+      "created_at": "2026-10-17T13:43:07.218772"
     },
     {
       "snapshot_date": "2026-10-12",
@@ -5825,7 +5825,7 @@
       "model_3_price_q1": 36872,
       "model_3_price_median": 38319,
       "model_3_price_q3": 41605,
-      "created_at": "2026-10-16T14:51:04.443612"
+      "created_at": "2026-10-17T13:43:07.218775"
     },
     {
       "snapshot_date": "2026-10-13",
@@ -5851,7 +5851,7 @@
       "model_3_price_q1": 38858,
       "model_3_price_median": 41395,
       "model_3_price_q3": 41994,
-      "created_at": "2026-10-16T14:51:04.443616"
+      "created_at": "2026-10-17T13:43:07.218778"
     },
     {
       "snapshot_date": "2026-10-13",
@@ -5877,7 +5877,7 @@
       "model_3_price_q1": 36931,
       "model_3_price_median": 38278,
       "model_3_price_q3": 41170,
-      "created_at": "2026-10-16T14:51:04.443619"
+      "created_at": "2026-10-17T13:43:07.218781"
     },
     {
       "snapshot_date": "2026-10-14",
@@ -5903,7 +5903,7 @@
       "model_3_price_q1": 38843,
       "model_3_price_median": 39410,
       "model_3_price_q3": 41990,
-      "created_at": "2026-10-16T14:51:04.443623"
+      "created_at": "2026-10-17T13:43:07.218783"
     },
     {
       "snapshot_date": "2026-10-14",
@@ -5929,7 +5929,7 @@
       "model_3_price_q1": 36753,
       "model_3_price_median": 38144,
       "model_3_price_q3": 41791,
-      "created_at": "2026-10-16T14:51:04.443626"
+      "created_at": "2026-10-17T13:43:07.218786"
     },
     {
       "snapshot_date": "2026-10-15",
@@ -5955,7 +5955,7 @@
       "model_3_price_q1": 38843,
       "model_3_price_median": 39410,
       "model_3_price_q3": 41990,
-      "created_at": "2026-10-16T14:51:04.443630"
+      "created_at": "2026-10-17T13:43:07.218789"
     },
     {
       "snapshot_date": "2026-10-15",
@@ -5981,7 +5981,7 @@
       "model_3_price_q1": 36872,
       "model_3_price_median": 38434,
       "model_3_price_q3": 42306,
-      "created_at": "2026-10-16T14:51:04.443633"
+      "created_at": "2026-10-17T13:43:07.218792"
     },
     {
       "snapshot_date": "2026-10-16",
@@ -6007,13 +6007,13 @@
       "model_3_price_q1": 38843,
       "model_3_price_median": 38990,
       "model_3_price_q3": 41395,
-      "created_at": "2026-10-16T14:51:10.463507"
+      "created_at": "2026-10-17T13:43:07.218797"
     },
     {
       "snapshot_date": "2026-10-16",
       "filter_signature": "b29716fc1be388fd7a8d7ecc821a236c0b4dc0fb811a905afcee17902f8aa5fb",
       "filter_description": "state=NJ,NY,PA | max_miles=40000",
-      "state": "NJ,NY,PA",
+      "state": "NJ",
       "min_price": null,
       "max_price": null,
       "min_miles": null,
@@ -6033,7 +6033,59 @@
       "model_3_price_q1": 36948,
       "model_3_price_median": 38434,
       "model_3_price_q3": 42546,
-      "created_at": "2026-10-16T14:51:10.565542"
+      "created_at": "2026-10-17T13:43:07.218799"
+    },
+    {
+      "snapshot_date": "2026-10-17",
+      "filter_signature": "900fbd00895a38eaff2e08aa2ef3f3c20983a766b617563944a2b423fffc60a8",
+      "filter_description": "state=MA | max_miles=40000",
+      "state": "MA",
+      "min_price": null,
+      "max_price": null,
+      "min_miles": null,
+      "max_miles": 40000,
+      "trim": null,
+      "year_min": null,
+      "year_max": null,
+      "clean_title_values": [],
+      "one_owner_values": [],
+      "model_y_count": 26,
+      "model_3_count": 11,
+      "model_y_price_lowest": 34497,
+      "model_y_price_q1": 37242,
+      "model_y_price_median": 40150,
+      "model_y_price_q3": 44878,
+      "model_3_price_lowest": 36495,
+      "model_3_price_q1": 38643,
+      "model_3_price_median": 38931,
+      "model_3_price_q3": 40899,
+      "created_at": "2026-10-17T13:43:13.474955"
+    },
+    {
+      "snapshot_date": "2026-10-17",
+      "filter_signature": "b29716fc1be388fd7a8d7ecc821a236c0b4dc0fb811a905afcee17902f8aa5fb",
+      "filter_description": "state=NJ,NY,PA | max_miles=40000",
+      "state": "NJ,NY,PA",
+      "min_price": null,
+      "max_price": null,
+      "min_miles": null,
+      "max_miles": 40000,
+      "trim": null,
+      "year_min": null,
+      "year_max": null,
+      "clean_title_values": [],
+      "one_owner_values": [],
+      "model_y_count": 79,
+      "model_3_count": 35,
+      "model_y_price_lowest": 28494,
+      "model_y_price_q1": 35590,
+      "model_y_price_median": 38170,
+      "model_y_price_q3": 46250,
+      "model_3_price_lowest": 32510,
+      "model_3_price_q1": 36812,
+      "model_3_price_median": 38278,
+      "model_3_price_q3": 43186,
+      "created_at": "2026-10-17T13:43:13.565217"
     }
   ]
 }
